@@ -76,4 +76,4 @@ Aucun pour l'instant.
 | B-054 | TODO | Renommer les fichiers du NAS selon la convention `[tmdbid-<id>]` sous `Films/` et `Series/` (docs/phase-7-nas.md §12), sous-titres `.srt` au même nom | 7 | P2 | Ouvert |
 | B-055 | IDEA | Fiche : « Dans la même veine » (`/recommendations`), saga (`belongs_to_collection`), bande-annonce, filtre plateformes sur suggestions | 8 | P3 | Reporté (hors phase 8) |
 | B-056 | IDEA | Statistiques : genres les plus vus (phase 6, nécessite les genres en base) | 6 | P3 | Reporté |
-| B-057 | TODO | Phase 8.1 à 8.5 : voir docs/phase-8-decouverte.md | 8 | P2 | En cours (8.1 et 8.2 livrées) |
+| B-057 | TODO | Phase 8.1 à 8.5 : voir docs/phase-8-decouverte.md | 8 | P2 | En cours (8.1 à 8.3 livrées) |

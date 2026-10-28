@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import TmdbSection from '@/features/discover/TmdbSection'
+import TonightPick from '@/features/discover/TonightPick'
 import { tmdbSections } from '@/features/discover/sections'
 import { libraryKey, parseTypeFilter, type TypeFilter } from '@/features/library/group'
 import { useLibrary } from '@/features/library/useLibrary'
@@ -17,16 +18,18 @@ export default function DiscoverPage() {
   // Filtre dans l'URL : le bouton retour restitue la même vue (D-34).
   const [params, setParams] = useSearchParams()
   const filter = parseTypeFilter(params.get('type'))
-  const setFilter = (value: TypeFilter) =>
+  const copyOnly = params.get('copy') === '1'
+  const update = (key: string, value: string | null) =>
     setParams(
       (current) => {
         const next = new URLSearchParams(current)
-        if (value === 'all') next.delete('type')
-        else next.set('type', value)
+        if (value) next.set(key, value)
+        else next.delete(key)
         return next
       },
       { replace: true },
     )
+  const setFilter = (value: TypeFilter) => update('type', value === 'all' ? null : value)
   const library = useLibrary()
   const owned = new Set((library.data ?? []).map((item) => libraryKey(item.type, item.id)))
 
@@ -48,6 +51,10 @@ export default function DiscoverPage() {
           </Button>
         ))}
       </div>
+
+      {library.isSuccess && (
+        <TonightPick items={library.data} type={filter} copyOnly={copyOnly} onToggleCopy={() => update('copy', copyOnly ? null : '1')} />
+      )}
 
       {tmdbSections(filter).map((section) => (
         <TmdbSection key={section.id} section={section} owned={owned} />
