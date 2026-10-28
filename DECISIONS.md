@@ -29,8 +29,9 @@ Une décision validée n'est modifiée que par une nouvelle entrée qui la rempl
 | D-23 | 2026-10-28 | Migration 001 appliquée via le connecteur Supabase ; fichier versionné dans `supabase/migrations/` ; adresse autorisée insérée hors dépôt | Traçabilité sans exposer l'adresse | |
 | D-24 | 2026-10-28 | Fonction `/api/tmdb` en un seul fichier (`api/tmdb.ts`, signature Web `export default { fetch }`), authentifiée par RPC `is_allowed()` avec le jeton Supabase de l'appelant ; tests et tsconfig hors de `api/` (Vercel déploie chaque fichier de `api/`) ; token TMDB en production uniquement | Pas de secret serveur supplémentaire, surface minimale | |
 | D-25 | 2026-10-28 | Limite TMDB : environ 40 requêtes par seconde (non contractuelle), réponse 429 relayée avec `Retry-After` | Vérification B-010 | |
-| D-26 | 2026-10-28 | shadcn/ui installé à la main (la CLI ne peut pas joindre ui.shadcn.com depuis la session), fichiers au format shadcn (style new-york, `components.json`), package `radix-ui`, police Inter via `@fontsource-variable/inter` (pas de CDN), accent violet oklch(0.68 0.2 285), thème sombre sur `:root` | CLI inaccessible, compatibilité conservée pour de futurs `shadcn add` | D-22 (précise) |
+| D-26 | 2026-10-28 | shadcn/ui installé à la main (la CLI ne peut pas joindre ui.shadcn.com depuis la session), fichiers au format shadcn (style new-york, `components.json`), package `radix-ui`, police Inter via `@fontsource-variable/inter` (pas de CDN), accent violet oklch(0.68 0.2 285), remplacé par le jaune en D-28, thème sombre sur `:root` | CLI inaccessible, compatibilité conservée pour de futurs `shadcn add` | D-22 (précise) |
 | D-27 | 2026-10-28 | `vercel.json` : réécriture SPA vers `/index.html` pour tout chemin hors `/api/` | Routes React Router (`/login`, `/search`, `/library`) accessibles en accès direct | |
+| D-28 | 2026-10-28 | Accent jaune « sous-titres » oklch(0.88 0.18 95) avec texte noir sur l'accent ; fonds neutres (teinte 100) à la place des fonds violets | Demande de l'utilisateur | D-26 (accent) |
 
 ## Modèle d'entrée
 

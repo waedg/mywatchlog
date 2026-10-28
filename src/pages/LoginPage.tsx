@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-[radial-gradient(ellipse_at_top,oklch(0.25_0.08_285),transparent_60%)] px-4">
+    <main className="flex min-h-dvh items-center justify-center bg-[radial-gradient(ellipse_at_top,oklch(0.3_0.06_95),transparent_60%)] px-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
           <span className="mb-2 flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
