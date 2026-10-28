@@ -149,3 +149,61 @@ describe('filterForYou', () => {
     expect(filterForYou(results, new Set(), 'all', 2)).toHaveLength(2)
   })
 })
+
+import { activeFilterCount, MAX_GENRES, parseExplore, parseYear, toDiscoverFilters, toggleGenre } from '../src/features/discover/explore'
+
+describe('parseExplore', () => {
+  const parse = (query: string) => parseExplore(new URLSearchParams(query))
+  it('valeurs par défaut : films, tri par popularité, aucun filtre', () => {
+    expect(parse('')).toEqual({ type: 'movie', genres: [], yearFrom: undefined, yearTo: undefined, minRating: undefined, provider: undefined, sort: 'popularity' })
+  })
+  it('relit tous les filtres', () => {
+    expect(parse('type=tv&g=18,35&from=2000&to=2010&min=7&p=8&sort=rating')).toEqual({
+      type: 'tv',
+      genres: [18, 35],
+      yearFrom: 2000,
+      yearTo: 2010,
+      minRating: 7,
+      provider: 8,
+      sort: 'rating',
+    })
+  })
+  it('ignore les valeurs invalides, les doublons et plafonne les genres', () => {
+    const state = parse('type=anime&g=abc,28,28,0,12,16,35,80,99,10&from=20&to=abcd&min=11&p=-3&sort=hasard')
+    expect(state.type).toBe('movie')
+    expect(state.genres).toEqual([28, 12, 16, 35, 80])
+    expect(state.genres).toHaveLength(MAX_GENRES)
+    expect([state.yearFrom, state.yearTo, state.minRating, state.provider, state.sort]).toEqual([undefined, undefined, undefined, undefined, 'popularity'])
+  })
+  it('ignore des années inversées', () => {
+    const state = parse('from=2020&to=2010')
+    expect([state.yearFrom, state.yearTo]).toEqual([undefined, undefined])
+  })
+})
+
+describe('parseYear', () => {
+  it('exige 4 chiffres dans les bornes', () => {
+    expect(parseYear('1999')).toBe(1999)
+    expect(parseYear('199')).toBeUndefined()
+    expect(parseYear('1800')).toBeUndefined()
+    expect(parseYear('2101')).toBeUndefined()
+    expect(parseYear(null)).toBeUndefined()
+  })
+})
+
+describe('toDiscoverFilters / toggleGenre / activeFilterCount', () => {
+  const base = parseExplore(new URLSearchParams('g=28&p=8&min=7'))
+  it('n\'envoie le pays qu\'avec une plateforme', () => {
+    expect(toDiscoverFilters(base, 'FR', 2)).toMatchObject({ provider: 8, region: 'FR', page: 2, genres: [28], minRating: 7 })
+    expect(toDiscoverFilters({ ...base, provider: undefined }, 'FR', 1).region).toBeUndefined()
+  })
+  it('ajoute, retire et respecte le maximum de genres', () => {
+    expect(toggleGenre([1, 2], 3)).toEqual([1, 2, 3])
+    expect(toggleGenre([1, 2], 2)).toEqual([1])
+    expect(toggleGenre([1, 2, 3, 4, 5], 6)).toEqual([1, 2, 3, 4, 5])
+  })
+  it('compte les filtres actifs', () => {
+    expect(activeFilterCount(base)).toBe(3)
+    expect(activeFilterCount(parseExplore(new URLSearchParams('sort=date&type=tv')))).toBe(0)
+  })
+})

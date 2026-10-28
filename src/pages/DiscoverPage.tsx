@@ -1,4 +1,5 @@
-import { useSearchParams } from 'react-router-dom'
+import { SlidersHorizontal } from 'lucide-react'
+import { Link, useSearchParams } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import ForYouSection from '@/features/discover/ForYouSection'
@@ -36,7 +37,15 @@ export default function DiscoverPage() {
 
   return (
     <section className="space-y-8">
-      <h1 className="text-2xl font-bold tracking-tight">Découvrir</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold tracking-tight">Découvrir</h1>
+        <Button variant="outline" size="sm" className="rounded-full" asChild>
+          <Link to="/discover/explore">
+            <SlidersHorizontal />
+            Explorer
+          </Link>
+        </Button>
+      </div>
 
       <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrer par type">
         {FILTERS.map(({ value, label }) => (

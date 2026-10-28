@@ -1,10 +1,11 @@
 import type {
-  DiscoverSort,
+  DiscoverFilters,
   ForYouResponse,
   GenresResponse,
   ListResponse,
   MediaType,
   PersonDetails,
+  ProviderListResponse,
   ProvidersResponse,
   SearchResponse,
   SeasonDetails,
@@ -62,17 +63,6 @@ export function getGenres(type: MediaType, signal?: AbortSignal): Promise<Genres
   return tmdbRequest<GenresResponse>({ action: 'genres', type }, signal)
 }
 
-export interface DiscoverFilters {
-  genres?: number[]
-  yearFrom?: number
-  yearTo?: number
-  minRating?: number
-  provider?: number
-  region?: string
-  sort?: DiscoverSort
-  page?: number
-}
-
 export function discoverTitles(type: MediaType, filters: DiscoverFilters, signal?: AbortSignal): Promise<ListResponse> {
   const params: Record<string, string> = { action: 'discover', type }
   if (filters.genres?.length) params.genres = filters.genres.join(',')
@@ -91,4 +81,8 @@ export function discoverTitles(type: MediaType, filters: DiscoverFilters, signal
 /** `sources` : 15 titres au maximum (les autres sont ignorés par l'appelant). */
 export function getForYou(sources: { id: number; type: MediaType }[], signal?: AbortSignal): Promise<ForYouResponse> {
   return tmdbRequest<ForYouResponse>({ action: 'forYou', sources: sources.map((s) => `${s.type}:${s.id}`).join(',') }, signal)
+}
+
+export function getWatchProviders(type: MediaType, region: string, signal?: AbortSignal): Promise<ProviderListResponse> {
+  return tmdbRequest<ProviderListResponse>({ action: 'watchProviders', type, region }, signal)
 }

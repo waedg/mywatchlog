@@ -106,3 +106,27 @@ describe('api/tmdb — phase 8', () => {
     expect(await response.json()).toEqual({ genres: [{ id: 28, name: 'Action' }] })
   })
 })
+
+describe('api/tmdb — watchProviders', () => {
+  beforeEach(() => {
+    vi.stubEnv('TMDB_READ_TOKEN', 'tmdb')
+    vi.stubEnv('VITE_SUPABASE_URL', 'https://supabase.test')
+    vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'anon')
+  })
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.unstubAllGlobals()
+  })
+  it('valide type et pays puis interroge le catalogue', async () => {
+    const fetchMock = mockFetch(() => Response.json({ results: [{ provider_id: 8, provider_name: 'Netflix', logo_path: '/n.png', display_priorities: { FR: 1 } }] }))
+    vi.stubGlobal('fetch', fetchMock)
+    expect((await call('action=watchProviders&type=all&region=FR')).status).toBe(400)
+    expect((await call('action=watchProviders&type=movie&region=fr')).status).toBe(400)
+    const response = await call('action=watchProviders&type=movie&region=FR')
+    expect(response.status).toBe(200)
+    expect(response.headers.get('Cache-Control')).toBe('private, max-age=86400')
+    expect(((await response.json()) as { providers: { name: string }[] }).providers[0]?.name).toBe('Netflix')
+    const url = new URL(String(fetchMock.mock.calls.find(([u]) => String(u).includes('/watch/providers/movie'))?.[0]))
+    expect(url.searchParams.get('watch_region')).toBe('FR')
+  })
+})

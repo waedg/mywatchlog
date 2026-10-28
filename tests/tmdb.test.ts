@@ -8,6 +8,7 @@ import {
   mapList,
   mapListItem,
   mapNextEpisode,
+  mapProviderCatalog,
   mapPerson,
   mapPersonCredits,
   mapProviders,
@@ -372,5 +373,22 @@ describe('aggregateRecommendations', () => {
   })
   it('ne retient que la limite demandée', () => {
     expect(aggregateRecommendations(sources, [[item(1, 5), item(2, 6), item(3, 7)]], 2)).toHaveLength(2)
+  })
+})
+
+describe('mapProviderCatalog', () => {
+  it('classe par priorité du pays, dédoublonne et ignore les entrées invalides', () => {
+    const result = mapProviderCatalog('FR', {
+      results: [
+        { provider_id: 2, provider_name: 'B', display_priorities: { FR: 5 } },
+        { provider_id: 1, provider_name: 'A', display_priorities: { FR: 1, US: 9 } },
+        { provider_id: 1, provider_name: 'A (doublon)' },
+        { provider_id: 3, provider_name: ' ' },
+        { provider_name: 'sans id' },
+        { provider_id: 4, provider_name: 'C', display_priority: 3 },
+      ],
+    })
+    expect(result.region).toBe('FR')
+    expect(result.providers.map((p) => p.id)).toEqual([1, 4, 2])
   })
 })

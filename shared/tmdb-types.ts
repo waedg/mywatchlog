@@ -149,3 +149,21 @@ export interface ForYouResult extends ListResult {
 export interface ForYouResponse {
   results: ForYouResult[]
 }
+
+export interface ProviderListResponse {
+  region: string
+  /** Plateformes de streaming du pays, les plus courantes d'abord. */
+  providers: ProviderInfo[]
+}
+
+/** Filtres de la recherche par critères (Explorer). */
+export interface DiscoverFilters {
+  genres?: number[]
+  yearFrom?: number
+  yearTo?: number
+  minRating?: number
+  provider?: number
+  region?: string
+  sort?: DiscoverSort
+  page?: number
+}

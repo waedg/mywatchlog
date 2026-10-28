@@ -15,6 +15,7 @@ import type {
   PersonCredit,
   PersonDetails,
   ProviderInfo,
+  ProviderListResponse,
   ProvidersResponse,
   SearchResult,
   SeasonDetails,
@@ -215,6 +216,28 @@ export function mapProviders(region: string, data: TmdbProviders): ProvidersResp
     rent: mapProviderList(entry?.rent),
     buy: mapProviderList(entry?.buy),
   }
+}
+
+interface TmdbProviderCatalogEntry extends TmdbProviderEntry {
+  display_priorities?: Record<string, number>
+}
+
+const PROVIDER_LIST_LIMIT = 40
+
+/** Plateformes d'un pays (catalogue TMDB), classées par priorité d'affichage dans ce pays. */
+export function mapProviderCatalog(region: string, data: { results?: TmdbProviderCatalogEntry[] }): ProviderListResponse {
+  const seen = new Set<number>()
+  const providers = (data.results ?? [])
+    .filter((p) => Number.isInteger(p.provider_id) && p.provider_name?.trim())
+    .filter((p) => !seen.has(p.provider_id as number) && !!seen.add(p.provider_id as number))
+    .sort(
+      (a, b) =>
+        (a.display_priorities?.[region] ?? a.display_priority ?? 999) - (b.display_priorities?.[region] ?? b.display_priority ?? 999) ||
+        (a.provider_name as string).localeCompare(b.provider_name as string, 'fr'),
+    )
+    .slice(0, PROVIDER_LIST_LIMIT)
+    .map((p): ProviderInfo => ({ id: p.provider_id as number, name: (p.provider_name as string).trim(), logoPath: p.logo_path ?? null }))
+  return { region, providers }
 }
 
 // Genres TMDB exclus de la filmographie : talk-shows (10767) et actualités (10763), où l'acteur apparaît « en tant que lui-même ».
@@ -580,6 +603,18 @@ export default {
         )
       }
 
+      if (action === 'watchProviders') {
+        const type = params.get('type')
+        const region = params.get('region') ?? ''
+        if (type !== 'movie' && type !== 'tv') return json({ error: 'bad_request', detail: 'type (movie ou tv)' }, 400)
+        if (!/^[A-Z]{2}$/.test(region)) return json({ error: 'bad_request', detail: 'region (code pays à 2 lettres majuscules)' }, 400)
+        const data = await tmdbGet<{ results?: TmdbProviderCatalogEntry[] }>(`/watch/providers/${type}`, {
+          language: LANG_PRIMARY,
+          watch_region: region,
+        })
+        return json(mapProviderCatalog(region, data), 200, GENRES_CACHE)
+      }
+
       if (action === 'genres') {
         const type = params.get('type')
         if (type !== 'movie' && type !== 'tv') return json({ error: 'bad_request', detail: 'type (movie ou tv)' }, 400)
@@ -672,7 +707,7 @@ export default {
         return json(mapPerson(primary, fallback))
       }
 
-      return json({ error: 'bad_request', detail: 'action (search, details, season, providers, person, trending, popular, genres, discover ou forYou)' }, 400)
+      return json({ error: 'bad_request', detail: 'action (search, details, season, providers, person, trending, popular, genres, watchProviders, discover ou forYou)' }, 400)
     } catch (error) {
       if (error instanceof TmdbError) {
         if (error.status === 404) return json({ error: 'not_found' }, 404)
