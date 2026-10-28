@@ -1,0 +1,76 @@
+import { Clapperboard, Library, Search } from 'lucide-react'
+import { NavLink, Outlet } from 'react-router-dom'
+
+import { cn } from '@/lib/utils'
+
+const links = [
+  { to: '/search', label: 'Recherche', icon: Search },
+  { to: '/library', label: 'Ma liste', icon: Library },
+]
+
+function Brand() {
+  return (
+    <div className="flex items-center gap-2 font-semibold tracking-tight">
+      <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <Clapperboard className="size-4" />
+      </span>
+      <span className="text-lg">MyWatchlog</span>
+    </div>
+  )
+}
+
+export default function AppLayout() {
+  return (
+    <div className="min-h-dvh">
+      <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+          <Brand />
+          <nav className="hidden items-center gap-1 md:flex" aria-label="Navigation principale">
+            {links.map(({ to, label, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground',
+                    isActive && 'bg-accent text-foreground',
+                  )
+                }
+              >
+                <Icon className="size-4" />
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-4 pb-28 pt-6 md:pb-10">
+        <Outlet />
+      </main>
+
+      <nav
+        className="fixed inset-x-0 bottom-0 z-20 border-t bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+        aria-label="Navigation principale"
+      >
+        <div className="mx-auto grid max-w-md grid-cols-2">
+          {links.map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                cn(
+                  'flex flex-col items-center gap-1 py-3 text-xs font-medium text-muted-foreground transition-colors',
+                  isActive && 'text-primary',
+                )
+              }
+            >
+              <Icon className="size-5" />
+              {label}
+            </NavLink>
+          ))}
+        </div>
+      </nav>
+    </div>
+  )
+}

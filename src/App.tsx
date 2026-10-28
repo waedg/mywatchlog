@@ -1,9 +1,22 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+
+import AppLayout from '@/components/layout/AppLayout'
+import LibraryPage from '@/pages/LibraryPage'
+import LoginPage from '@/pages/LoginPage'
+import SearchPage from '@/pages/SearchPage'
+
 function App() {
   return (
-    <main className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col items-center justify-center gap-2 p-6">
-      <h1 className="text-3xl font-semibold">MyWatchlog</h1>
-      <p className="text-neutral-400">Suivi de films et séries — phase 0 : squelette en ligne.</p>
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route element={<AppLayout />}>
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/library" element={<LibraryPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/library" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

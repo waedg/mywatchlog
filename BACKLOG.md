@@ -18,6 +18,7 @@ Statuts : `Ouvert`, `En cours`, `Résolu`, `Abandonné`.
 | B-027 | VERIF | Conseil Supabase « is_allowed() exécutable par authenticated » : voulu (utilisé par les policies RLS, ne renvoie que l'état de l'appelant). Réévaluer un déplacement vers un schéma privé | 2 | P3 | Accepté |
 | B-028 | VERIF | `npm audit` : vulnérabilité deepmerge via vite-plugin-pwa, workbox-build (outils de build, pas de code envoyé au navigateur). Ne pas appliquer `audit fix --force` (rétrograde vite-plugin-pwa). Réévaluer en phase 4 | 4 | P3 | Ouvert |
 | B-029 | TODO | Tester `/api/tmdb` avec un jeton utilisateur réel (recherche, détails film et série, `imdb_id`) une fois la connexion Google en place | 1 | P1 | Ouvert |
+| B-030 | VERIF | Valider visuellement le rendu (accent violet, thème sombre, navigation basse mobile) sur le téléphone de l'utilisateur et ajuster | 1 | P2 | Ouvert |
 
 ## Points à vérifier
 
