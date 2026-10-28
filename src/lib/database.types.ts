@@ -17,7 +17,9 @@ export type Database = {
         Row: {
           id: number
           imdb_id: string | null
+          is_ended: boolean | null
           poster_path: string | null
+          season_counts: Json | null
           title: string
           type: string
           updated_at: string
@@ -26,6 +28,8 @@ export type Database = {
         Insert: {
           id: number
           imdb_id?: string | null
+          is_ended?: boolean | null
+          season_counts?: Json | null
           poster_path?: string | null
           title: string
           type: string
@@ -35,6 +39,8 @@ export type Database = {
         Update: {
           id?: number
           imdb_id?: string | null
+          is_ended?: boolean | null
+          season_counts?: Json | null
           poster_path?: string | null
           title?: string
           type?: string
@@ -42,6 +48,41 @@ export type Database = {
           year?: number | null
         }
         Relationships: []
+      }
+      user_episodes: {
+        Row: {
+          episode_number: number
+          season_number: number
+          title_id: number
+          title_type: string
+          user_id: string
+          watched_at: string
+        }
+        Insert: {
+          episode_number: number
+          season_number: number
+          title_id: number
+          title_type?: string
+          user_id: string
+          watched_at?: string
+        }
+        Update: {
+          episode_number?: number
+          season_number?: number
+          title_id?: number
+          title_type?: string
+          user_id?: string
+          watched_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'user_episodes_title_id_title_type_fkey'
+            columns: ['title_id', 'title_type']
+            isOneToOne: false
+            referencedRelation: 'titles'
+            referencedColumns: ['id', 'type']
+          },
+        ]
       }
       user_titles: {
         Row: {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mapDetails, mapSearchItem, yearFrom } from '../api/tmdb'
+import { mapDetails, mapSearchItem, mapSeason, mapTvInfo, yearFrom } from '../api/tmdb'
 
 describe('yearFrom', () => {
   it('extrait l’année d’une date ISO', () => {
@@ -101,5 +101,49 @@ describe('mapDetails', () => {
   it('renvoie voteAverage null quand la note vaut 0 ou est absente', () => {
     expect(mapDetails('movie', { id: 1, title: 'A', vote_average: 0 }).voteAverage).toBeNull()
     expect(mapDetails('movie', { id: 1, title: 'A' }).voteAverage).toBeNull()
+  })
+})
+
+describe('mapTvInfo', () => {
+  it('trie les saisons, nomme les saisons sans nom et détecte une série terminée', () => {
+    const tv = mapTvInfo({
+      status: 'Ended',
+      seasons: [
+        { season_number: 2, name: '', episode_count: 8, air_date: '2009-03-08' },
+        { season_number: 0, name: 'Épisodes spéciaux', episode_count: 9 },
+        { season_number: 1, name: 'Saison 1', episode_count: 7, air_date: '' },
+        { name: 'sans numéro', episode_count: 3 },
+      ],
+    })
+    expect(tv.ended).toBe(true)
+    expect(tv.seasons.map((s) => s.seasonNumber)).toEqual([0, 1, 2])
+    expect(tv.seasons[2]).toEqual({ seasonNumber: 2, name: 'Saison 2', episodeCount: 8, airDate: '2009-03-08' })
+    expect(tv.seasons[1]?.airDate).toBeNull()
+  })
+  it('série en cours ou sans saisons', () => {
+    expect(mapTvInfo({ status: 'Returning Series' }).ended).toBe(false)
+    expect(mapTvInfo({ status: 'Canceled' }).ended).toBe(true)
+    expect(mapTvInfo({}).seasons).toEqual([])
+  })
+  it('mapDetails renseigne tv pour une série et null pour un film', () => {
+    expect(mapDetails('tv', { id: 1, name: 'S', seasons: [{ season_number: 1, episode_count: 2 }] }).tv?.seasons).toHaveLength(1)
+    expect(mapDetails('movie', { id: 1, title: 'F' }).tv).toBeNull()
+  })
+})
+
+describe('mapSeason', () => {
+  it('filtre, trie et complète les épisodes', () => {
+    const season = mapSeason(1, {
+      episodes: [
+        { episode_number: 2, name: '', air_date: '', runtime: 0 },
+        { episode_number: 1, name: 'Pilote', air_date: '2008-01-20', runtime: 58 },
+        { name: 'sans numéro' },
+      ],
+    })
+    expect(season.seasonNumber).toBe(1)
+    expect(season.episodes).toEqual([
+      { episodeNumber: 1, name: 'Pilote', airDate: '2008-01-20', runtime: 58 },
+      { episodeNumber: 2, name: 'Épisode 2', airDate: null, runtime: null },
+    ])
   })
 })

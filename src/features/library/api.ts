@@ -2,12 +2,13 @@ import { getTitleDetails } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 import type { MediaType, SearchResult } from '../../../shared/tmdb-types'
 
+import { parseSeasonCounts, toSeasonCounts } from '../episodes/progress'
 import { isStatus, type LibraryItem, type Status } from './group'
 
 export async function fetchLibrary(): Promise<LibraryItem[]> {
   const { data, error } = await supabase
     .from('user_titles')
-    .select('status, is_favorite, rating, titles ( id, type, title, year, poster_path )')
+    .select('status, is_favorite, rating, titles ( id, type, title, year, poster_path, season_counts, is_ended )')
   if (error) throw error
 
   const items: LibraryItem[] = []
@@ -24,6 +25,8 @@ export async function fetchLibrary(): Promise<LibraryItem[]> {
       status: row.status,
       isFavorite: row.is_favorite,
       rating: row.rating,
+      seasonCounts: parseSeasonCounts(title.season_counts),
+      isEnded: title.is_ended,
     })
   }
   return items
@@ -44,6 +47,8 @@ export async function addToLibrary(item: Pick<SearchResult, 'id' | 'type'>, user
       title: details.title,
       year: details.year,
       poster_path: details.posterPath,
+      season_counts: details.tv ? toSeasonCounts(details.tv.seasons) : null,
+      is_ended: details.tv ? details.tv.ended : null,
       updated_at: new Date().toISOString(),
     },
     { onConflict: 'id,type' },
@@ -79,8 +84,16 @@ export async function updateUserTitle(ref: TitleRef, userId: string, patch: User
   if (error) throw error
 }
 
-/** Retire le titre de la liste : la note et le favori sont supprimés avec la ligne (D-32). */
+/** Retire le titre de la liste : la note, le favori et les épisodes vus sont supprimés (D-32). */
 export async function removeFromLibrary(ref: TitleRef, userId: string): Promise<void> {
+  if (ref.type === 'tv') {
+    const { error: episodesError } = await supabase
+      .from('user_episodes')
+      .delete()
+      .eq('user_id', userId)
+      .eq('title_id', ref.id)
+    if (episodesError) throw episodesError
+  }
   const { error } = await supabase
     .from('user_titles')
     .delete()

@@ -1,4 +1,5 @@
 import type { MediaType } from '../../../shared/tmdb-types'
+import type { SeasonCount } from '../episodes/progress'
 
 export type Status = 'to_watch' | 'watching' | 'watched' | 'dropped'
 
@@ -20,6 +21,9 @@ export interface LibraryItem {
   status: Status
   isFavorite: boolean
   rating: number | null
+  /** Séries : épisodes par saison (vide tant que la fiche n'a pas été ouverte). */
+  seasonCounts: SeasonCount[]
+  isEnded: boolean | null
 }
 
 export type TypeFilter = 'all' | MediaType

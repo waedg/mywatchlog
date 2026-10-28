@@ -3,7 +3,15 @@
 // - Le token TMDB (TMDB_READ_TOKEN) n'est lu que côté serveur.
 // - Langue : fr-FR, repli sur en-US quand le synopsis ou le titre est vide.
 
-import type { MediaType, SearchResult, TitleDetails } from '../shared/tmdb-types'
+import type {
+  EpisodeInfo,
+  MediaType,
+  SearchResult,
+  SeasonDetails,
+  SeasonSummary,
+  TitleDetails,
+  TvInfo,
+} from '../shared/tmdb-types'
 
 const TMDB_BASE = 'https://api.themoviedb.org/3'
 const LANG_PRIMARY = 'fr-FR'
@@ -24,6 +32,24 @@ interface TmdbItem {
   vote_average?: number | null
   imdb_id?: string | null
   external_ids?: { imdb_id?: string | null }
+  status?: string
+  seasons?: TmdbSeason[]
+  season_number?: number
+  episodes?: TmdbEpisode[]
+}
+
+interface TmdbSeason {
+  season_number?: number
+  name?: string
+  episode_count?: number
+  air_date?: string | null
+}
+
+interface TmdbEpisode {
+  episode_number?: number
+  name?: string
+  air_date?: string | null
+  runtime?: number | null
 }
 
 // ---------- Fonctions pures (testées avec Vitest) ----------
@@ -85,7 +111,34 @@ export function mapDetails(
       typeof primary.vote_average === 'number' && primary.vote_average > 0
         ? Math.round(primary.vote_average * 10) / 10
         : null,
+    tv: type === 'tv' ? mapTvInfo(primary) : null,
   }
+}
+
+export function mapTvInfo(item: TmdbItem): TvInfo {
+  const seasons: SeasonSummary[] = (item.seasons ?? [])
+    .filter((season) => Number.isInteger(season.season_number) && (season.season_number as number) >= 0)
+    .map((season) => ({
+      seasonNumber: season.season_number as number,
+      name: season.name?.trim() || `Saison ${season.season_number}`,
+      episodeCount: Math.max(0, Math.trunc(season.episode_count ?? 0)),
+      airDate: season.air_date || null,
+    }))
+    .sort((a, b) => a.seasonNumber - b.seasonNumber)
+  return { seasons, ended: item.status === 'Ended' || item.status === 'Canceled' }
+}
+
+export function mapSeason(seasonNumber: number, item: TmdbItem): SeasonDetails {
+  const episodes: EpisodeInfo[] = (item.episodes ?? [])
+    .filter((episode) => Number.isInteger(episode.episode_number) && (episode.episode_number as number) >= 1)
+    .map((episode) => ({
+      episodeNumber: episode.episode_number as number,
+      name: episode.name?.trim() || `Épisode ${episode.episode_number}`,
+      airDate: episode.air_date || null,
+      runtime: typeof episode.runtime === 'number' && episode.runtime > 0 ? episode.runtime : null,
+    }))
+    .sort((a, b) => a.episodeNumber - b.episodeNumber)
+  return { seasonNumber, episodes }
 }
 
 // ---------- Accès TMDB ----------
@@ -195,7 +248,17 @@ export default {
         return json(mapDetails(type, primary, fallback))
       }
 
-      return json({ error: 'bad_request', detail: 'action (search ou details)' }, 400)
+      if (action === 'season') {
+        const id = Number(params.get('id'))
+        const season = Number(params.get('season'))
+        if (!Number.isInteger(id) || id < 1) return json({ error: 'bad_request', detail: 'id (entier positif)' }, 400)
+        if (!Number.isInteger(season) || season < 0 || season > 500) return json({ error: 'bad_request', detail: 'season (0 à 500)' }, 400)
+
+        const data = await tmdbGet(`/tv/${id}/season/${season}`, { language: LANG_PRIMARY })
+        return json(mapSeason(season, data))
+      }
+
+      return json({ error: 'bad_request', detail: 'action (search, details ou season)' }, 400)
     } catch (error) {
       if (error instanceof TmdbError) {
         if (error.status === 404) return json({ error: 'not_found' }, 404)

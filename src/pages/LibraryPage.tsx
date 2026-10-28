@@ -6,6 +6,8 @@ import PosterCard from '@/components/PosterCard'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { groupByStatus, libraryKey, STATUS_LABELS, type TypeFilter } from '@/features/library/group'
+import TvProgress from '@/features/episodes/TvProgress'
+import { useWatched } from '@/features/episodes/useEpisodes'
 import QuickWatchedButton from '@/features/library/QuickWatchedButton'
 import { useLibrary } from '@/features/library/useLibrary'
 import { cn } from '@/lib/utils'
@@ -22,6 +24,7 @@ export default function LibraryPage() {
   const [filter, setFilter] = useState<TypeFilter>('all')
   const [favoritesOnly, setFavoritesOnly] = useState(false)
   const library = useLibrary()
+  const watched = useWatched()
 
   const items = library.data ?? []
   const groups = groupByStatus(items, filter, favoritesOnly)
@@ -104,7 +107,10 @@ export default function LibraryPage() {
                   posterPath={item.posterPath}
                   to={`/title/${item.type}/${item.id}`}
                   action={
-                    item.status !== 'watched' ? <QuickWatchedButton id={item.id} type={item.type} /> : undefined
+                    <>
+                      <TvProgress item={item} watched={watched.data?.get(item.id)} />
+                      {item.status !== 'watched' && <QuickWatchedButton id={item.id} type={item.type} />}
+                    </>
                   }
                 />
               ))}

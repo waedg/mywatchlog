@@ -55,6 +55,10 @@ export function useRemoveFromLibrary(ref: TitleRef) {
 
   return useMutation({
     mutationFn: () => removeFromLibrary(ref, userId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: LIBRARY_KEY }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: LIBRARY_KEY }),
+        queryClient.invalidateQueries({ queryKey: ['watched-all'] }),
+      ]),
   })
 }

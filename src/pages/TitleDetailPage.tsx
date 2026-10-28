@@ -1,10 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, ExternalLink, Heart, Star, Trash2 } from 'lucide-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 
 import FullScreenLoader from '@/components/layout/FullScreenLoader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import EpisodeTracker from '@/features/episodes/EpisodeTracker'
+import { sameSeasonCounts, toSeasonCounts } from '@/features/episodes/progress'
+import { syncTvMeta } from '@/features/episodes/api'
+import { useWatched } from '@/features/episodes/useEpisodes'
 import AddToLibraryButton from '@/features/library/AddToLibraryButton'
 import {
   isValidRating,
@@ -35,10 +40,21 @@ function TitleDetail({ type, id }: { type: MediaType; id: number }) {
   const navigate = useNavigate()
   const details = useTitleDetails(type, id)
   const library = useLibrary()
-
-  if (details.isPending || library.isPending) return <FullScreenLoader />
+  const watched = useWatched()
+  const queryClient = useQueryClient()
 
   const entry = library.data?.find((item) => libraryKey(item.type, item.id) === libraryKey(type, id))
+  const tv = details.data?.tv ?? null
+
+  // Série ajoutée avant les compteurs de saisons, ou saisons modifiées par TMDB : on remet le cache à jour.
+  useEffect(() => {
+    if (!entry || !tv) return
+    const counts = toSeasonCounts(tv.seasons)
+    if (sameSeasonCounts(counts, entry.seasonCounts) && entry.isEnded === tv.ended) return
+    void syncTvMeta(id, counts, tv.ended).then(() => queryClient.invalidateQueries({ queryKey: ['library'] }))
+  }, [entry, tv, id, queryClient])
+
+  if (details.isPending || library.isPending) return <FullScreenLoader />
 
   return (
     <section className="space-y-6">
@@ -100,6 +116,12 @@ function TitleDetail({ type, id }: { type: MediaType; id: number }) {
 
             {entry ? <Actions entry={entry} /> : <AddToLibraryButton item={{ id, type }} inLibrary={false} />}
           </div>
+
+          {entry && details.data.tv && (
+            <div className="md:col-span-2">
+              <EpisodeTracker tvId={id} tv={details.data.tv} watched={watched.data?.get(id) ?? new Set<string>()} />
+            </div>
+          )}
         </div>
       )}
     </section>
