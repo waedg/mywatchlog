@@ -25,6 +25,7 @@ Une décision validée n'est modifiée que par une nouvelle entrée qui la rempl
 | D-19 | 2026-10-28 | Interface en français uniquement (phase 1) | Simplicité, usage perso | |
 | D-20 | 2026-10-28 | Tests : Vitest pour les fonctions pures, tests manuels sur le déploiement, pas d'e2e | Effort proportionné à un projet perso | |
 | D-21 | 2026-10-28 | Interface moderne et attractive exigée : Tailwind seul écarté, bibliothèque de composants à choisir (B-006) | Exigence de l'utilisateur | |
+| D-22 | 2026-10-28 | Interface : shadcn/ui (Radix + Tailwind), thème sombre uniquement | Rendu moderne et attractif demandé (D-21) | D-21 (précise) |
 
 ## Modèle d'entrée
 

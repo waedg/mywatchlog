@@ -13,7 +13,7 @@ Statuts : `Ouvert`, `En cours`, `Résolu`, `Abandonné`.
 | B-003 | DEC | Gestion des épisodes spéciaux (saison 0) et des saisons annoncées sans date | 3 | P2 | Ouvert |
 | B-004 | DEC | Fuseau horaire d'affichage des sorties (Europe/Paris) et gestion des dates TMDB | 5 | P3 | Ouvert |
 | B-005 | DEC | Stratégie de tests (unitaires, e2e) et niveau de couverture attendu | 1 | P3 | Résolu (D-20) |
-| B-006 | DEC | Bibliothèque de composants UI : Tailwind seul écarté (D-21), choisir une bibliothèque moderne | 1 | P1 | Ouvert |
+| B-006 | DEC | Bibliothèque de composants UI : Tailwind seul écarté (D-21), choisir une bibliothèque moderne | 1 | P1 | Résolu (D-22) |
 | B-026 | DEC | Bloquer la création de compte non autorisé (hook « Before User Created » Supabase) | 2 | P3 | Ouvert |
 
 ## Points à vérifier
@@ -34,7 +34,7 @@ Statuts : `Ouvert`, `En cours`, `Résolu`, `Abandonné`.
 | B-021 | TODO | Rattacher le dépôt à la session et commiter les fichiers de cadrage | 0 | P1 | Résolu |
 | B-022 | TODO | Créer le projet Vercel relié au dépôt | 0 | P1 | Résolu |
 | B-023 | TODO | Ajouter une page « À propos » avec mention et logo TMDB | 4 | P2 | Ouvert |
-| B-024 | TODO | Renseigner l'URL du site (https://mywatchlog-delta.vercel.app) et l'URI de redirection dans Supabase Auth (URL Configuration) | 1 | P1 | Ouvert |
+| B-024 | TODO | Renseigner l'URL du site (https://mywatchlog-delta.vercel.app) et l'URI de redirection dans Supabase Auth (URL Configuration) | 1 | P1 | Résolu (déclaré par l'utilisateur) |
 | B-025 | TODO | Accorder au connecteur Vercel l'accès à l'espace de l'utilisateur (403 sur le scope wago1) | 1 | P3 | Résolu |
 
 ## Bugs
