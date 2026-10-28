@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Cast from '@/features/credits/Cast'
 import Providers from '@/features/providers/Providers'
+import CopyToggle from '@/features/library/CopyToggle'
 import EpisodeTracker from '@/features/episodes/EpisodeTracker'
 import { sameSeasonCounts, toSeasonCounts } from '@/features/episodes/progress'
 import { syncTvMeta } from '@/features/episodes/api'
@@ -130,6 +131,8 @@ function TitleDetail({ type, id }: { type: MediaType; id: number }) {
             )}
 
             <Providers type={type} id={id} />
+
+            {entry && <CopyToggle entry={entry} />}
 
             {entry ? <Actions entry={entry} /> : <AddToLibraryButton item={{ id, type }} inLibrary={false} />}
           </div>

@@ -10,6 +10,7 @@ const make = (over: Partial<LibraryItem>): LibraryItem => ({
   status: 'to_watch',
   isFavorite: false,
   rating: null,
+  hasCopy: false,
   seasonCounts: [],
   isEnded: null,
   ...over,

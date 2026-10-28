@@ -13,6 +13,7 @@ const item = (over: Partial<LibraryItem>): LibraryItem => ({
   status: 'watching',
   isFavorite: false,
   rating: null,
+  hasCopy: false,
   seasonCounts: [],
   isEnded: false,
   ...over,

@@ -86,6 +86,7 @@ export type Database = {
       }
       user_titles: {
         Row: {
+          has_copy: boolean
           is_favorite: boolean
           rating: number | null
           status: string
@@ -95,6 +96,7 @@ export type Database = {
           watched_at: string | null
         }
         Insert: {
+          has_copy?: boolean
           is_favorite?: boolean
           rating?: number | null
           status?: string
@@ -104,6 +106,7 @@ export type Database = {
           watched_at?: string | null
         }
         Update: {
+          has_copy?: boolean
           is_favorite?: boolean
           rating?: number | null
           status?: string

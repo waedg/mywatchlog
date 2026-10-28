@@ -21,6 +21,8 @@ export interface LibraryItem {
   status: Status
   isFavorite: boolean
   rating: number | null
+  /** Possède une copie du titre (fichier local ou NAS). */
+  hasCopy: boolean
   /** Séries : épisodes par saison (vide tant que la fiche n'a pas été ouverte). */
   seasonCounts: SeasonCount[]
   isEnded: boolean | null

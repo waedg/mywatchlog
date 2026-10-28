@@ -8,7 +8,7 @@ import { isStatus, type LibraryItem, type Status } from './group'
 export async function fetchLibrary(): Promise<LibraryItem[]> {
   const { data, error } = await supabase
     .from('user_titles')
-    .select('status, is_favorite, rating, titles ( id, type, title, year, poster_path, season_counts, is_ended )')
+    .select('status, is_favorite, rating, has_copy, titles ( id, type, title, year, poster_path, season_counts, is_ended )')
   if (error) throw error
 
   const items: LibraryItem[] = []
@@ -25,6 +25,7 @@ export async function fetchLibrary(): Promise<LibraryItem[]> {
       status: row.status,
       isFavorite: row.is_favorite,
       rating: row.rating,
+      hasCopy: row.has_copy,
       seasonCounts: parseSeasonCounts(title.season_counts),
       isEnded: title.is_ended,
     })
@@ -71,6 +72,7 @@ export interface UserTitlePatch {
   status?: Status
   rating?: number | null
   is_favorite?: boolean
+  has_copy?: boolean
   watched_at?: string | null
 }
 
