@@ -1,6 +1,8 @@
-import { Clapperboard, Library, Search } from 'lucide-react'
+import { Clapperboard, Library, LogOut, Search } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 
+import { Button } from '@/components/ui/button'
+import { useAuth } from '@/features/auth/auth-context'
 import { cn } from '@/lib/utils'
 
 const links = [
@@ -20,28 +22,35 @@ function Brand() {
 }
 
 export default function AppLayout() {
+  const { signOut } = useAuth()
+
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
           <Brand />
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Navigation principale">
-            {links.map(({ to, label, icon: Icon }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  cn(
-                    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground',
-                    isActive && 'bg-accent text-foreground',
-                  )
-                }
-              >
-                <Icon className="size-4" />
-                {label}
-              </NavLink>
-            ))}
-          </nav>
+          <div className="flex items-center gap-1">
+            <nav className="hidden items-center gap-1 md:flex" aria-label="Navigation principale">
+              {links.map(({ to, label, icon: Icon }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground',
+                      isActive && 'bg-accent text-foreground',
+                    )
+                  }
+                >
+                  <Icon className="size-4" />
+                  {label}
+                </NavLink>
+              ))}
+            </nav>
+            <Button variant="ghost" size="icon" aria-label="Se déconnecter" onClick={() => void signOut()}>
+              <LogOut />
+            </Button>
+          </div>
         </div>
       </header>
 
