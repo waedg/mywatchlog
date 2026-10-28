@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import AboutPage from '@/pages/AboutPage'
 import AppLayout from '@/components/layout/AppLayout'
+import DiscoverPage from '@/pages/DiscoverPage'
 import RequireAuth from '@/features/auth/RequireAuth'
 import LibraryPage from '@/pages/LibraryPage'
 import LoginPage from '@/pages/LoginPage'
@@ -18,6 +19,7 @@ function App() {
         <Route element={<RequireAuth />}>
           <Route element={<AppLayout />}>
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/discover" element={<DiscoverPage />} />
             <Route path="/library" element={<LibraryPage />} />
             <Route path="/upcoming" element={<UpcomingPage />} />
             <Route path="/person/:id" element={<PersonPage />} />
