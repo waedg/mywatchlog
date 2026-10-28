@@ -127,7 +127,7 @@ export default function LibraryPage() {
                   posterPath={item.posterPath}
                   to={`/title/${item.type}/${item.id}`}
                   overlay={
-                    item.status === 'watched' ? <WatchedMark /> : <QuickWatchedButton id={item.id} type={item.type} />
+                    item.status === 'watched' ? <WatchedMark id={item.id} type={item.type} /> : <QuickWatchedButton id={item.id} type={item.type} />
                   }
                   action={<TvProgress item={item} watched={watched.data?.get(item.id)} />}
                 />

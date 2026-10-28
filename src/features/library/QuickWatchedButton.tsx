@@ -14,12 +14,25 @@ export default function QuickWatchedButton({ id, type }: { id: number; type: Med
   return type === 'movie' ? <MovieQuick id={id} /> : <TvQuick id={id} />
 }
 
-/** Indicateur « Vu » (non cliquable). */
-export function WatchedMark() {
+/**
+ * Pastille « Vu » : un clic remet le titre à « À regarder » (note et favori conservés).
+ * Pour une série, seul le statut change : les épisodes cochés restent cochés (le statut se
+ * recalcule au prochain épisode coché ou décoché).
+ */
+export function WatchedMark({ id, type }: { id: number; type: MediaType }) {
+  const update = useUpdateUserTitle({ id, type })
+  const label = 'Remettre à regarder'
   return (
-    <span role="img" aria-label="Vu" className={`${ROUND} border-primary bg-primary text-primary-foreground`}>
-      <CircleCheck className="size-5" />
-    </span>
+    <button
+      type="button"
+      className={`${ROUND} border-primary bg-primary text-primary-foreground hover:bg-primary/80 disabled:opacity-60`}
+      aria-label={label}
+      title={label}
+      disabled={update.isPending}
+      onClick={() => update.mutate(statusPatch('to_watch'))}
+    >
+      {update.isPending ? <Loader2 className="size-5 animate-spin" /> : <CircleCheck className="size-5" />}
+    </button>
   )
 }
 

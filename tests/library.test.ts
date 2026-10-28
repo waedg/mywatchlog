@@ -61,6 +61,7 @@ describe('statusPatch', () => {
     expect(statusPatch('watched', now)).toEqual({ status: 'watched', watched_at: '2026-10-28T12:00:00.000Z' })
     expect(statusPatch('watching', now)).toEqual({ status: 'watching', watched_at: null })
     expect(statusPatch('dropped', now).watched_at).toBeNull()
+    expect(statusPatch('to_watch', now)).toEqual({ status: 'to_watch', watched_at: null })
   })
 })
 
