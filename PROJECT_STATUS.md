@@ -36,6 +36,7 @@ Cadrage complet : document « MyWatchlog : Cadrage du projet » (artifact Claude
 | 4 | PWA Android, hors-ligne, mention TMDB | Terminée (testée le 2026-10-28), logo TMDB en place |
 | 5 | Sorties, calendrier, fiches acteurs, personnes suivies, où regarder | Terminée (testée le 2026-10-28) |
 | 6 | Notifications push, statistiques | En attente (décision du 2026-10-28) : découpage proposé (statistiques, notifications push, réglages), à relancer après la période d'utilisation |
+| 7 | Lecture de fichiers vidéo depuis le NAS (FileBrowser Quantum, Tailscale) | Cadrée, sans développement : voir [docs/phase-7-nas.md](docs/phase-7-nas.md) ; essai de compatibilité 7.0 à faire |
 
 ## Checklist phase 0
 
