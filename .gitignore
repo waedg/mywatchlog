@@ -1,0 +1,13 @@
+# Dépendances et builds
+node_modules/
+dist/
+.vercel/
+
+# Secrets : ne jamais commiter (dépôt public)
+.env
+.env.*
+!.env.example
+
+# Divers
+.DS_Store
+*.log
