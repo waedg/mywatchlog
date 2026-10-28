@@ -136,3 +136,10 @@ export function progressTone(status: Status, watched: number, total: number, end
   if (total > 0 && watched >= total) return ended ? 'ended' : 'caught-up'
   return 'progress'
 }
+
+/** Épisodes vus par série, sous forme sérialisable (persistée pour la lecture hors-ligne). */
+export type WatchedRecord = Record<number, string[]>
+
+export function toWatchedMap(record: WatchedRecord): Map<number, Set<string>> {
+  return new Map(Object.entries(record).map(([id, keys]) => [Number(id), new Set(keys)]))
+}

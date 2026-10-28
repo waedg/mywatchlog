@@ -3,13 +3,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/features/auth/auth-context'
 
 import { fetchAllWatched } from './api'
+import { toWatchedMap } from './progress'
 import { collectAired, collectAllOfSeason, reconcile, setEpisodesWatched } from './service'
 
 export const WATCHED_KEY = ['watched-all'] as const
 
 /** Épisodes vus de toutes les séries : tvId -> ensemble de clés « saisonxépisode ». */
 export function useWatched() {
-  return useQuery({ queryKey: WATCHED_KEY, queryFn: fetchAllWatched, staleTime: 60_000 })
+  return useQuery({ queryKey: WATCHED_KEY, queryFn: fetchAllWatched, staleTime: 60_000, select: toWatchedMap })
 }
 
 export function useEpisodeActions(tvId: number) {

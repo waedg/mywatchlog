@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
+import AboutPage from '@/pages/AboutPage'
 import AppLayout from '@/components/layout/AppLayout'
 import RequireAuth from '@/features/auth/RequireAuth'
 import LibraryPage from '@/pages/LibraryPage'
@@ -16,6 +17,7 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/search" element={<SearchPage />} />
             <Route path="/library" element={<LibraryPage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/title/:type/:id" element={<TitleDetailPage />} />
           </Route>
         </Route>

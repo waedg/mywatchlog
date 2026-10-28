@@ -33,7 +33,7 @@ Cadrage complet : document « MyWatchlog : Cadrage du projet » (artifact Claude
 | 1 | Connexion Google, recherche TMDB, ajout à la liste | Terminée (validée le 2026-10-28) |
 | 2 | Statuts, notes, favoris, films et séries séparés | Terminée (validée le 2026-10-28) |
 | 3 | Suivi épisode par épisode, prochain à voir | Terminée (testée le 2026-10-28), ajustements d'interface livrés (D-34) |
-| 4 | PWA Android, hors-ligne, mention TMDB | À faire |
+| 4 | PWA Android, hors-ligne, mention TMDB | Code livré (PWA installable, hors-ligne en lecture seule, page À propos), en attente du test d'installation sur Android ; logo TMDB à fournir (B-041) |
 | 5 | Sorties, calendrier, fiches acteurs, personnes suivies, où regarder | À faire |
 | 6 | Notifications push, statistiques | À faire |
 

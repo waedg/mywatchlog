@@ -1,13 +1,15 @@
-import { Clapperboard, Library, LogOut, Search } from 'lucide-react'
+import { Clapperboard, Info, Library, LogOut, Search, WifiOff } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
+import { useOnline } from '@/hooks/useOnline'
 import { useAuth } from '@/features/auth/auth-context'
 import { cn } from '@/lib/utils'
 
 const links = [
   { to: '/search', label: 'Recherche', icon: Search },
   { to: '/library', label: 'Ma liste', icon: Library },
+  { to: '/about', label: 'À propos', icon: Info },
 ]
 
 function Brand() {
@@ -23,6 +25,7 @@ function Brand() {
 
 export default function AppLayout() {
   const { signOut } = useAuth()
+  const online = useOnline()
 
   return (
     <div className="min-h-dvh">
@@ -54,6 +57,13 @@ export default function AppLayout() {
         </div>
       </header>
 
+      {!online && (
+        <div role="status" className="flex items-center justify-center gap-2 border-b bg-secondary px-4 py-2 text-xs">
+          <WifiOff className="size-3.5" />
+          Hors connexion : ta liste est en lecture seule.
+        </div>
+      )}
+
       <main className="mx-auto max-w-6xl px-4 pb-28 pt-6 md:pb-10">
         <Outlet />
       </main>
@@ -62,7 +72,7 @@ export default function AppLayout() {
         className="fixed inset-x-0 bottom-0 z-20 border-t bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
         aria-label="Navigation principale"
       >
-        <div className="mx-auto grid max-w-md grid-cols-2">
+        <div className="mx-auto grid max-w-md grid-cols-3">
           {links.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}

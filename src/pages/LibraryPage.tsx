@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
-import { Heart, Library } from 'lucide-react'
+import { Heart, Library, WifiOff } from 'lucide-react'
 
 import EmptyState from '@/components/layout/EmptyState'
 import PosterCard from '@/components/PosterCard'
@@ -70,7 +70,15 @@ export default function LibraryPage() {
         </Button>
       </div>
 
-      {library.isPending && (
+      {library.isPending && library.fetchStatus === 'paused' && (
+        <EmptyState
+          icon={WifiOff}
+          title="Hors connexion"
+          description="Ta liste n'a pas encore été enregistrée sur cet appareil. Reconnecte-toi une première fois."
+        />
+      )}
+
+      {library.isPending && library.fetchStatus !== 'paused' && (
         <div className={GRID} aria-busy="true">
           {Array.from({ length: 5 }, (_, index) => (
             <div key={index} className="space-y-2">

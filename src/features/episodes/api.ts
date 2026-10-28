@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import type { Json } from '@/lib/database.types'
 
-import { epKey, type EpisodeRef, type SeasonCount } from './progress'
+import { epKey, type EpisodeRef, type SeasonCount, type WatchedRecord } from './progress'
 
 const PAGE = 1000
 const CHUNK = 500
@@ -32,15 +32,14 @@ async function pageWatched(tvId?: number): Promise<WatchedRow[]> {
   return rows
 }
 
-export async function fetchAllWatched(): Promise<Map<number, Set<string>>> {
-  const map = new Map<number, Set<string>>()
+export async function fetchAllWatched(): Promise<WatchedRecord> {
+  const record: WatchedRecord = {}
   for (const row of await pageWatched()) {
-    const set = map.get(row.title_id) ?? new Set<string>()
-    set.add(epKey(row.season_number, row.episode_number))
-    map.set(row.title_id, set)
+    ;(record[row.title_id] ??= []).push(epKey(row.season_number, row.episode_number))
   }
-  return map
+  return record
 }
+
 
 export async function fetchWatchedFor(tvId: number): Promise<Set<string>> {
   return new Set((await pageWatched(tvId)).map((row) => epKey(row.season_number, row.episode_number)))

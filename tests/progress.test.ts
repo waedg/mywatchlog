@@ -11,6 +11,7 @@ import {
   sameSeasonCounts,
   selectAired,
   todayLocal,
+  toWatchedMap,
   totalEpisodes,
   watchedCount,
   watchedInSeason,
@@ -121,5 +122,15 @@ describe('progressTone', () => {
   it('sinon progression normale', () => {
     expect(progressTone('watching', 10, 44, false)).toBe('progress')
     expect(progressTone('to_watch', 0, 0, false)).toBe('progress')
+  })
+})
+
+describe('toWatchedMap', () => {
+  it('reconstruit les ensembles après un aller-retour JSON', () => {
+    const record = JSON.parse(JSON.stringify({ 1396: ['1x1', '1x2'], 42: ['2x5'] }))
+    const map = toWatchedMap(record)
+    expect(map.get(1396)?.has('1x2')).toBe(true)
+    expect(map.get(42)?.size).toBe(1)
+    expect(map.get(7)).toBeUndefined()
   })
 })

@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
-import { SearchX, Search as SearchIcon, X } from 'lucide-react'
+import { SearchX, Search as SearchIcon, WifiOff, X } from 'lucide-react'
 
 import EmptyState from '@/components/layout/EmptyState'
 import PosterCard from '@/components/PosterCard'
@@ -108,7 +108,15 @@ export default function SearchPage() {
             ))}
           </div>
 
-          {search.isPending && (
+          {search.isPending && search.fetchStatus === 'paused' && (
+            <EmptyState
+              icon={WifiOff}
+              title="Hors connexion"
+              description="La recherche nécessite une connexion à internet."
+            />
+          )}
+
+          {search.isPending && search.fetchStatus !== 'paused' && (
             <div className={GRID} aria-busy="true">
               {Array.from({ length: 10 }, (_, index) => (
                 <div key={index} className="space-y-2">

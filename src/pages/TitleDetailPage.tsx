@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, ExternalLink, Heart, Star, Trash2 } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Heart, Star, Trash2, WifiOff } from 'lucide-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 
+import EmptyState from '@/components/layout/EmptyState'
 import FullScreenLoader from '@/components/layout/FullScreenLoader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -53,6 +54,18 @@ function TitleDetail({ type, id }: { type: MediaType; id: number }) {
     if (sameSeasonCounts(counts, entry.seasonCounts) && entry.isEnded === tv.ended) return
     void syncTvMeta(id, counts, tv.ended).then(() => queryClient.invalidateQueries({ queryKey: ['library'] }))
   }, [entry, tv, id, queryClient])
+
+  if (details.isPending && details.fetchStatus === 'paused') {
+    return (
+      <section className="space-y-6">
+        <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+          <ArrowLeft />
+          Retour
+        </Button>
+        <EmptyState icon={WifiOff} title="Hors connexion" description="La fiche détaillée nécessite une connexion à internet." />
+      </section>
+    )
+  }
 
   if (details.isPending || library.isPending) return <FullScreenLoader />
 
