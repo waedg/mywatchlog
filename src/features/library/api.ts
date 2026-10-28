@@ -1,8 +1,8 @@
 import { getTitleDetails } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
-import type { SearchResult } from '../../../shared/tmdb-types'
+import type { MediaType, SearchResult } from '../../../shared/tmdb-types'
 
-import { isStatus, type LibraryItem } from './group'
+import { isStatus, type LibraryItem, type Status } from './group'
 
 export async function fetchLibrary(): Promise<LibraryItem[]> {
   const { data, error } = await supabase
@@ -55,4 +55,37 @@ export async function addToLibrary(item: Pick<SearchResult, 'id' | 'type'>, user
     { onConflict: 'user_id,title_id,title_type', ignoreDuplicates: true },
   )
   if (linkError) throw linkError
+}
+
+export interface TitleRef {
+  id: number
+  type: MediaType
+}
+
+export interface UserTitlePatch {
+  status?: Status
+  rating?: number | null
+  is_favorite?: boolean
+  watched_at?: string | null
+}
+
+export async function updateUserTitle(ref: TitleRef, userId: string, patch: UserTitlePatch): Promise<void> {
+  const { error } = await supabase
+    .from('user_titles')
+    .update(patch)
+    .eq('user_id', userId)
+    .eq('title_id', ref.id)
+    .eq('title_type', ref.type)
+  if (error) throw error
+}
+
+/** Retire le titre de la liste : la note et le favori sont supprimés avec la ligne (D-32). */
+export async function removeFromLibrary(ref: TitleRef, userId: string): Promise<void> {
+  const { error } = await supabase
+    .from('user_titles')
+    .delete()
+    .eq('user_id', userId)
+    .eq('title_id', ref.id)
+    .eq('title_type', ref.type)
+  if (error) throw error
 }

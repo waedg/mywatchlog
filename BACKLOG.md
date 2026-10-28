@@ -9,7 +9,7 @@ Statuts : `Ouvert`, `En cours`, `Résolu`, `Abandonné`.
 | ID | Type | Sujet | Phase cible | Prio | Statut |
 |---|---|---|---|---|---|
 | B-001 | DEC | Restreindre la connexion à l'adresse Google du propriétaire (liste d'autorisation ou inscriptions désactivées) | 1 | P1 | Résolu (D-17) |
-| B-002 | DEC | Ajouter un statut « abandonné » (`dropped`) en plus de à voir / en cours / vu | 2 | P2 | Ouvert |
+| B-002 | DEC | Ajouter un statut « abandonné » (`dropped`) en plus de à voir / en cours / vu | 2 | P2 | Résolu |
 | B-003 | DEC | Gestion des épisodes spéciaux (saison 0) et des saisons annoncées sans date | 3 | P2 | Ouvert |
 | B-004 | DEC | Fuseau horaire d'affichage des sorties (Europe/Paris) et gestion des dates TMDB | 5 | P3 | Ouvert |
 | B-005 | DEC | Stratégie de tests (unitaires, e2e) et niveau de couverture attendu | 1 | P3 | Résolu (D-20) |
@@ -54,3 +54,5 @@ Aucun pour l'instant.
 ```text
 | B-0XX | BUG | Description courte, étapes de reproduction | Phase | P1/P2/P3 | Ouvert |
 ```
+| B-035 | TODO | Phase 3 : « Marquer comme vu » sur une série doit marquer tous les épisodes comme vus (aujourd'hui seul le statut change) | 3 | P1 | Ouvert |
+| B-036 | TODO | Notes à la demi-étoile (0,5) si besoin : la colonne `rating` numeric(3,1) le permet, l'interface propose 1 à 10 entiers | 2 | P3 | Ouvert |

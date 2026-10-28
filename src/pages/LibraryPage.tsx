@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Library } from 'lucide-react'
+import { Heart, Library } from 'lucide-react'
 
 import EmptyState from '@/components/layout/EmptyState'
 import PosterCard from '@/components/PosterCard'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { groupByStatus, libraryKey, STATUS_LABELS, type TypeFilter } from '@/features/library/group'
+import QuickWatchedButton from '@/features/library/QuickWatchedButton'
 import { useLibrary } from '@/features/library/useLibrary'
 import { cn } from '@/lib/utils'
 
@@ -19,10 +20,11 @@ const GRID = 'grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:
 
 export default function LibraryPage() {
   const [filter, setFilter] = useState<TypeFilter>('all')
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
   const library = useLibrary()
 
   const items = library.data ?? []
-  const groups = groupByStatus(items, filter)
+  const groups = groupByStatus(items, filter, favoritesOnly)
 
   return (
     <section className="space-y-6">
@@ -41,6 +43,16 @@ export default function LibraryPage() {
             {label}
           </Button>
         ))}
+        <Button
+          size="sm"
+          variant={favoritesOnly ? 'default' : 'outline'}
+          className={cn('rounded-full', !favoritesOnly && 'text-muted-foreground')}
+          aria-pressed={favoritesOnly}
+          onClick={() => setFavoritesOnly((value) => !value)}
+        >
+          <Heart />
+          Favoris
+        </Button>
       </div>
 
       {library.isPending && (
@@ -66,11 +78,11 @@ export default function LibraryPage() {
       {library.isSuccess && groups.length === 0 && (
         <EmptyState
           icon={Library}
-          title={items.length === 0 ? 'Ta liste est vide' : 'Rien dans cette catégorie'}
+          title={items.length === 0 ? 'Ta liste est vide' : 'Rien dans cette sélection'}
           description={
             items.length === 0
               ? 'Les films et séries que tu ajouteras apparaîtront ici, classés par statut.'
-              : 'Essaie un autre filtre.'
+              : 'Essaie un autre filtre ou retire « Favoris ».'
           }
         />
       )}
@@ -90,6 +102,10 @@ export default function LibraryPage() {
                   year={item.year}
                   type={item.type}
                   posterPath={item.posterPath}
+                  to={`/title/${item.type}/${item.id}`}
+                  action={
+                    item.status !== 'watched' ? <QuickWatchedButton id={item.id} type={item.type} /> : undefined
+                  }
                 />
               ))}
             </div>

@@ -136,6 +136,7 @@ export default function SearchPage() {
                   year={item.year}
                   type={item.type}
                   posterPath={item.posterPath}
+                  to={`/title/${item.type}/${item.id}`}
                   action={
                     <AddToLibraryButton
                       item={item}

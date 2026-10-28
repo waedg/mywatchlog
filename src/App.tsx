@@ -5,6 +5,7 @@ import RequireAuth from '@/features/auth/RequireAuth'
 import LibraryPage from '@/pages/LibraryPage'
 import LoginPage from '@/pages/LoginPage'
 import SearchPage from '@/pages/SearchPage'
+import TitleDetailPage from '@/pages/TitleDetailPage'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/search" element={<SearchPage />} />
             <Route path="/library" element={<LibraryPage />} />
+            <Route path="/title/:type/:id" element={<TitleDetailPage />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/library" replace />} />

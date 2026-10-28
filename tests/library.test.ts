@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { groupByStatus, isStatus, libraryKey, type LibraryItem } from '../src/features/library/group'
+import { groupByStatus, isStatus, isValidRating, libraryKey, statusPatch, type LibraryItem } from '../src/features/library/group'
 
 const make = (over: Partial<LibraryItem>): LibraryItem => ({
   id: 1,
@@ -22,6 +22,7 @@ describe('libraryKey', () => {
 describe('isStatus', () => {
   it('valide les statuts connus uniquement', () => {
     expect(isStatus('watched')).toBe(true)
+    expect(isStatus('dropped')).toBe(true)
     expect(isStatus('abandoned')).toBe(false)
   })
 })
@@ -48,5 +49,37 @@ describe('groupByStatus', () => {
 
   it('renvoie une liste vide sans éléments', () => {
     expect(groupByStatus([])).toEqual([])
+  })
+})
+
+describe('statusPatch', () => {
+  const now = new Date('2026-10-28T12:00:00.000Z')
+  it('renseigne watched_at uniquement pour « Vu »', () => {
+    expect(statusPatch('watched', now)).toEqual({ status: 'watched', watched_at: '2026-10-28T12:00:00.000Z' })
+    expect(statusPatch('watching', now)).toEqual({ status: 'watching', watched_at: null })
+    expect(statusPatch('dropped', now).watched_at).toBeNull()
+  })
+})
+
+describe('isValidRating', () => {
+  it('accepte les entiers de 1 à 10', () => {
+    expect(isValidRating(1)).toBe(true)
+    expect(isValidRating(10)).toBe(true)
+    expect(isValidRating(0)).toBe(false)
+    expect(isValidRating(11)).toBe(false)
+    expect(isValidRating(7.5)).toBe(false)
+  })
+})
+
+describe('groupByStatus favoris et abandonnés', () => {
+  it('filtre les favoris et place « Abandonné » en dernier', () => {
+    const items = [
+      make({ id: 1, title: 'A', status: 'dropped', isFavorite: true }),
+      make({ id: 2, title: 'B', status: 'watched', isFavorite: true }),
+      make({ id: 3, title: 'C', status: 'watched' }),
+    ]
+    const groups = groupByStatus(items, 'all', true)
+    expect(groups.map((g) => g.status)).toEqual(['watched', 'dropped'])
+    expect(groups[0]?.items).toHaveLength(1)
   })
 })

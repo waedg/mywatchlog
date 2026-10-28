@@ -30,8 +30,8 @@ Cadrage complet : document « MyWatchlog : Cadrage du projet » (artifact Claude
 | Phase | Contenu | Statut |
 |---|---|---|
 | 0 | Comptes, dépôt, squelette Vite + React + TS, déploiement Vercel | Terminée, en attente de validation (https://mywatchlog-delta.vercel.app/) |
-| 1 | Connexion Google, recherche TMDB, ajout à la liste | En cours : 1.1 à 1.3 faits, 1.4 interface : fondations, connexion, recherche, ajout à la liste et page « Ma liste » écrits, en attente du test sur téléphone |
-| 2 | Statuts, notes, favoris, films et séries séparés | À faire |
+| 1 | Connexion Google, recherche TMDB, ajout à la liste | Terminée (validée le 2026-10-28) |
+| 2 | Statuts, notes, favoris, films et séries séparés | Code livré (détail, statuts dont « Abandonné », note, favoris, retrait, bouton « Vu »), en attente du test sur téléphone |
 | 3 | Suivi épisode par épisode, prochain à voir | À faire |
 | 4 | PWA Android, hors-ligne, mention TMDB | À faire |
 | 5 | Sorties, calendrier, fiches acteurs, personnes suivies, où regarder | À faire |
