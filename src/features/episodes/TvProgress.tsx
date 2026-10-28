@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 
 import type { LibraryItem } from '../library/group'
 
-import { formatEpisode, nextEpisode, progressTone, totalEpisodes, watchedCount, type ProgressTone } from './progress'
+import { formatNextEpisode, nextEpisode, progressTone, totalEpisodes, watchedCount, type ProgressTone } from './progress'
 
 const BAR_STYLE: Record<ProgressTone, CSSProperties> = {
   progress: { backgroundColor: 'var(--primary)' },
@@ -44,7 +44,7 @@ export default function TvProgress({ item, watched }: { item: LibraryItem; watch
         {tone === 'dropped'
           ? ' · abandonné'
           : next
-            ? ` · prochain ${formatEpisode(next.season, next.episode)}`
+            ? ` · prochain ${formatNextEpisode(next)}`
             : item.isEnded
               ? ' · terminé'
               : ' · à jour'}

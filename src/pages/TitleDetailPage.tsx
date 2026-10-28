@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, ExternalLink, Heart, Star, Trash2, WifiOff } from 'lucide-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
@@ -13,6 +13,7 @@ import CopyToggle from '@/features/library/CopyToggle'
 import EpisodeTracker from '@/features/episodes/EpisodeTracker'
 import { sameSeasonCounts, toSeasonCounts } from '@/features/episodes/progress'
 import { syncTvMeta } from '@/features/episodes/api'
+import { learnSeasonFirsts } from '@/features/episodes/service'
 import { useWatched } from '@/features/episodes/useEpisodes'
 import AddToLibraryButton from '@/features/library/AddToLibraryButton'
 import {
@@ -51,11 +52,25 @@ function TitleDetail({ type, id }: { type: MediaType; id: number }) {
   const tv = details.data?.tv ?? null
 
   // Série ajoutée avant les compteurs de saisons, ou saisons modifiées par TMDB : on remet le cache à jour.
+  // Ensuite, on relève une fois le numéro du premier épisode de chaque saison (numérotation continue sur TMDB).
+  const learning = useRef(false)
   useEffect(() => {
     if (!entry || !tv) return
     const counts = toSeasonCounts(tv.seasons)
-    if (sameSeasonCounts(counts, entry.seasonCounts) && entry.isEnded === tv.ended) return
-    void syncTvMeta(id, counts, tv.ended).then(() => queryClient.invalidateQueries({ queryKey: ['library'] }))
+    if (!sameSeasonCounts(counts, entry.seasonCounts) || entry.isEnded !== tv.ended) {
+      void syncTvMeta(id, counts, tv.ended)
+        .then(() => queryClient.invalidateQueries({ queryKey: ['library'] }))
+        .catch(() => undefined)
+      return
+    }
+    if (learning.current) return
+    learning.current = true
+    void learnSeasonFirsts(queryClient, id, entry.seasonCounts)
+      .then((learned) => (learned ? queryClient.invalidateQueries({ queryKey: ['library'] }) : undefined))
+      .catch(() => undefined)
+      .finally(() => {
+        learning.current = false
+      })
   }, [entry, tv, id, queryClient])
 
   if (details.isPending && details.fetchStatus === 'paused') {

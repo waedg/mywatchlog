@@ -2,13 +2,17 @@ import { describe, expect, it } from 'vitest'
 import {
   autoStatus,
   epKey,
+  firstEpisodeNumber,
   formatEpisode,
+  formatNextEpisode,
   isAired,
   isUpcoming,
+  mergeFirsts,
   nextEpisode,
   parseSeasonCounts,
   progressTone,
   sameSeasonCounts,
+  seasonsMissingFirst,
   selectAired,
   todayLocal,
   toWatchedMap,
@@ -132,5 +136,79 @@ describe('toWatchedMap', () => {
     expect(map.get(1396)?.has('1x2')).toBe(true)
     expect(map.get(42)?.size).toBe(1)
     expect(map.get(7)).toBeUndefined()
+  })
+})
+
+// Hunter x Hunter (2011) : TMDB numérote les épisodes en continu (S2 = 63 à 136, S3 = 137 à 148).
+describe('numérotation continue des épisodes', () => {
+  const hxh = [
+    { season: 1, episodes: 62 },
+    { season: 2, episodes: 74 },
+    { season: 3, episodes: 12 },
+  ]
+  const range = (season: number, from: number, to: number) => Array.from({ length: to - from + 1 }, (_, i) => epKey(season, from + i))
+  const all = new Set([...range(1, 1, 62), ...range(2, 63, 136), ...range(3, 137, 148)])
+
+  it('compte 148/148 sans connaître les premiers numéros', () => {
+    expect(totalEpisodes(hxh)).toBe(148)
+    expect(watchedCount(all, hxh)).toBe(148)
+    expect(watchedInSeason(all, 2, 74)).toBe(74)
+  })
+  it('compte exactement avec les premiers numéros connus', () => {
+    const known = [
+      { season: 1, episodes: 62, first: 1 },
+      { season: 2, episodes: 74, first: 63 },
+      { season: 3, episodes: 12, first: 137 },
+    ]
+    expect(watchedCount(all, known)).toBe(148)
+    expect(watchedCount(new Set(range(2, 63, 70)), known)).toBe(8)
+    // un épisode hors plage n'est pas compté
+    expect(watchedCount(new Set([epKey(2, 5)]), known)).toBe(0)
+  })
+  it('affiche « terminé » (aucun prochain épisode) quand tout est vu', () => {
+    expect(nextEpisode(all, hxh)).toBeNull()
+  })
+  it('trouve le vrai prochain épisode quand le premier numéro est connu', () => {
+    const known = [
+      { season: 1, episodes: 62, first: 1 },
+      { season: 2, episodes: 74, first: 63 },
+    ]
+    const watched = new Set([...range(1, 1, 62), ...range(2, 63, 70)])
+    expect(nextEpisode(watched, known)).toEqual({ season: 2, episode: 71 })
+    expect(formatNextEpisode({ season: 2, episode: 71 })).toBe('S02E71')
+  })
+  it('n\'invente pas de numéro quand la numérotation est inconnue et irrégulière', () => {
+    const watched = new Set([...range(1, 1, 62), ...range(2, 63, 100)])
+    expect(nextEpisode(watched, hxh)).toEqual({ season: 2, episode: null })
+    expect(formatNextEpisode({ season: 2, episode: null })).toBe('S02')
+  })
+})
+
+describe('premiers numéros d\'épisode', () => {
+  it('relit et conserve first dans season_counts', () => {
+    expect(parseSeasonCounts([{ season: 2, episodes: 74, first: 63 }, { season: 1, episodes: 62, first: 'x' }])).toEqual([
+      { season: 1, episodes: 62 },
+      { season: 2, episodes: 74, first: 63 },
+    ])
+  })
+  it('sameSeasonCounts ignore first', () => {
+    expect(sameSeasonCounts([{ season: 1, episodes: 3, first: 5 }], [{ season: 1, episodes: 3 }])).toBe(true)
+  })
+  it('mergeFirsts garde les premiers numéros déjà relevés', () => {
+    const fresh = [{ season: 1, episodes: 62 }, { season: 2, episodes: 74 }, { season: 3, episodes: 12 }]
+    const previous = [{ season: 1, episodes: 62, first: 1 }, { season: 2, episodes: 74, first: 63 }]
+    expect(mergeFirsts(fresh, previous)).toEqual([
+      { season: 1, episodes: 62, first: 1 },
+      { season: 2, episodes: 74, first: 63 },
+      { season: 3, episodes: 12 },
+    ])
+  })
+  it('seasonsMissingFirst ignore les spéciaux et les saisons vides', () => {
+    expect(seasonsMissingFirst([{ season: 0, episodes: 3 }, { season: 1, episodes: 5, first: 1 }, { season: 2, episodes: 4 }, { season: 3, episodes: 0 }])).toEqual([2])
+  })
+  it('firstEpisodeNumber prend le plus petit numéro', () => {
+    const episode = (n: number) => ({ episodeNumber: n, name: '', airDate: null, runtime: null })
+    expect(firstEpisodeNumber({ seasonNumber: 2, episodes: [episode(64), episode(63), episode(65)] })).toBe(63)
+    expect(firstEpisodeNumber({ seasonNumber: 2, episodes: [] })).toBeNull()
   })
 })

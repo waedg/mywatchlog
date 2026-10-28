@@ -1,8 +1,12 @@
 import type { SeasonDetails, SeasonSummary } from '../../../shared/tmdb-types'
 import type { Status } from '../library/group'
 
-/** Nombre d'épisodes d'une saison (stocké dans titles.season_counts). */
-export type SeasonCount = { season: number; episodes: number }
+/**
+ * Nombre d'épisodes d'une saison (stocké dans titles.season_counts).
+ * `first` : numéro du premier épisode de la saison, quand il n'est pas 1 (certaines séries, comme Hunter x Hunter,
+ * numérotent leurs épisodes en continu d'une saison à l'autre sur TMDB). Absent tant qu'il n'a pas été relevé.
+ */
+export type SeasonCount = { season: number; episodes: number; first?: number }
 
 export interface EpisodeRef {
   season: number
@@ -27,14 +31,17 @@ export function parseSeasonCounts(value: unknown): SeasonCount[] {
   const counts: SeasonCount[] = []
   for (const entry of value) {
     if (typeof entry !== 'object' || entry === null) continue
-    const { season, episodes } = entry as Record<string, unknown>
+    const { season, episodes, first } = entry as Record<string, unknown>
     if (Number.isInteger(season) && Number.isInteger(episodes) && (season as number) >= 0 && (episodes as number) >= 0) {
-      counts.push({ season: season as number, episodes: episodes as number })
+      const count: SeasonCount = { season: season as number, episodes: episodes as number }
+      if (Number.isInteger(first) && (first as number) >= 0) count.first = first as number
+      counts.push(count)
     }
   }
   return counts.sort((a, b) => a.season - b.season)
 }
 
+/** Compare les saisons et leurs nombres d'épisodes (le numéro de premier épisode `first` est ignoré). */
 export function sameSeasonCounts(a: SeasonCount[], b: SeasonCount[]): boolean {
   return a.length === b.length && a.every((c, i) => c.season === b[i]?.season && c.episodes === b[i]?.episodes)
 }
@@ -44,29 +51,100 @@ export function totalEpisodes(counts: SeasonCount[]): number {
   return counts.filter((c) => c.season > 0).reduce((sum, c) => sum + c.episodes, 0)
 }
 
-/** Épisodes vus compris dans le total (hors spéciaux, hors numéros hors saison). */
+/** Nombre d'épisodes cochés par saison, quel que soit leur numéro (clés « SxE »). */
+function watchedPerSeason(watched: ReadonlySet<string>): Map<number, number> {
+  const perSeason = new Map<number, number>()
+  for (const key of watched) {
+    const season = Number.parseInt(key, 10)
+    if (Number.isInteger(season)) perSeason.set(season, (perSeason.get(season) ?? 0) + 1)
+  }
+  return perSeason
+}
+
+/**
+ * Épisodes vus d'une saison. Avec `first` connu : compte exactement les numéros de la saison.
+ * Sans : compte les épisodes cochés de la saison, plafonné à son nombre d'épisodes, sans supposer la numérotation 1 à N.
+ */
+export function watchedInSeason(
+  watched: ReadonlySet<string>,
+  season: number,
+  episodes: number,
+  first?: number,
+  perSeason: Map<number, number> = watchedPerSeason(watched),
+): number {
+  if (first !== undefined) {
+    let n = 0
+    for (let e = first; e < first + episodes; e += 1) if (watched.has(epKey(season, e))) n += 1
+    return n
+  }
+  return Math.min(episodes, perSeason.get(season) ?? 0)
+}
+
+/** Épisodes vus compris dans le total (hors spéciaux, hors épisodes en trop). */
 export function watchedCount(watched: ReadonlySet<string>, counts: SeasonCount[]): number {
+  const perSeason = watchedPerSeason(watched)
   let n = 0
-  for (const { season, episodes } of counts) {
+  for (const { season, episodes, first } of counts) {
     if (season === 0) continue
-    for (let e = 1; e <= episodes; e += 1) if (watched.has(epKey(season, e))) n += 1
+    n += watchedInSeason(watched, season, episodes, first, perSeason)
   }
   return n
 }
 
-export function watchedInSeason(watched: ReadonlySet<string>, season: number, episodes: number): number {
-  let n = 0
-  for (let e = 1; e <= episodes; e += 1) if (watched.has(epKey(season, e))) n += 1
-  return n
+/** Prochain épisode : `episode` est null quand la numérotation de la saison n'est pas connue. */
+export interface NextEpisodeRef {
+  season: number
+  episode: number | null
 }
 
 /** Premier épisode non vu (hors spéciaux), ou null si tout est vu. */
-export function nextEpisode(watched: ReadonlySet<string>, counts: SeasonCount[]): EpisodeRef | null {
-  for (const { season, episodes } of counts) {
-    if (season === 0) continue
-    for (let e = 1; e <= episodes; e += 1) if (!watched.has(epKey(season, e))) return { season, episode: e }
+export function nextEpisode(watched: ReadonlySet<string>, counts: SeasonCount[]): NextEpisodeRef | null {
+  const perSeason = watchedPerSeason(watched)
+  for (const { season, episodes, first } of counts) {
+    if (season === 0 || episodes <= 0) continue
+    if (watchedInSeason(watched, season, episodes, first, perSeason) >= episodes) continue
+
+    const start = first ?? 1
+    for (let e = start; e < start + episodes; e += 1) {
+      if (watched.has(epKey(season, e))) continue
+      // Sans premier numéro connu, des épisodes cochés hors de 1..N trahissent une numérotation continue : on n'invente pas de numéro.
+      const irregular = first === undefined && (perSeason.get(season) ?? 0) > 0 && hasWatchedBeyond(watched, season, episodes)
+      return { season, episode: irregular ? null : e }
+    }
+    return { season, episode: null }
   }
   return null
+}
+
+function hasWatchedBeyond(watched: ReadonlySet<string>, season: number, episodes: number): boolean {
+  for (const key of watched) {
+    const [s, e] = key.split('x').map(Number)
+    if (s === season && (e as number) > episodes) return true
+  }
+  return false
+}
+
+export function formatNextEpisode(next: NextEpisodeRef): string {
+  return next.episode === null ? `S${String(next.season).padStart(2, '0')}` : formatEpisode(next.season, next.episode)
+}
+
+/** Numéro du premier épisode d'une saison chargée (null si elle est vide). */
+export function firstEpisodeNumber(season: SeasonDetails): number | null {
+  return season.episodes.length === 0 ? null : Math.min(...season.episodes.map((episode) => episode.episodeNumber))
+}
+
+/** Conserve les numéros de premier épisode déjà relevés quand les saisons sont rafraîchies depuis TMDB. */
+export function mergeFirsts(fresh: SeasonCount[], previous: SeasonCount[]): SeasonCount[] {
+  const known = new Map(previous.flatMap((count) => (count.first === undefined ? [] : [[count.season, count.first] as const])))
+  return fresh.map((count) => {
+    const first = known.get(count.season)
+    return first === undefined ? { season: count.season, episodes: count.episodes } : { ...count, first }
+  })
+}
+
+/** Saisons (hors spéciaux, non vides) dont le premier numéro d'épisode reste à relever. */
+export function seasonsMissingFirst(counts: SeasonCount[]): number[] {
+  return counts.filter((count) => count.season > 0 && count.episodes > 0 && count.first === undefined).map((count) => count.season)
 }
 
 /** Diffusé à une date connue passée ou égale à aujourd'hui (date inconnue = non diffusé pour les actions groupées). */

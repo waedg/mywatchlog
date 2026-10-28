@@ -5,15 +5,18 @@ import type { SeasonDetails, TitleDetails, TvInfo } from '../../../shared/tmdb-t
 
 import { updateUserTitle } from '../library/api'
 import { isStatus, statusPatch } from '../library/group'
-import { fetchStatus, fetchWatchedFor, setEpisodesWatched, syncTvMeta } from './api'
+import { fetchStatus, fetchWatchedFor, saveSeasonFirsts, setEpisodesWatched, syncTvMeta } from './api'
 import {
   autoStatus,
+  firstEpisodeNumber,
+  seasonsMissingFirst,
   selectAired,
   todayLocal,
   toSeasonCounts,
   totalEpisodes,
   watchedCount,
   type EpisodeRef,
+  type SeasonCount,
 } from './progress'
 
 const DETAILS_STALE = 10 * 60_000
@@ -69,8 +72,11 @@ export async function collectAllOfSeason(qc: QueryClient, tvId: number, season: 
  */
 export async function reconcile(qc: QueryClient, userId: string, tvId: number): Promise<void> {
   const { tv } = await loadTv(qc, tvId)
-  const counts = toSeasonCounts(tv.seasons)
-  await syncTvMeta(tvId, counts, tv.ended)
+  const counts = await syncTvMeta(tvId, toSeasonCounts(tv.seasons), tv.ended)
+  // Relevé du premier numéro d'épisode de chaque saison, en arrière-plan (une seule fois par série).
+  void learnSeasonFirsts(qc, tvId, counts)
+    .then((learned) => (learned ? qc.invalidateQueries({ queryKey: ['library'] }) : undefined))
+    .catch(() => undefined)
 
   const current = await fetchStatus(tvId, userId)
   if (!current || !isStatus(current)) return
@@ -78,6 +84,31 @@ export async function reconcile(qc: QueryClient, userId: string, tvId: number): 
   const watched = await fetchWatchedFor(tvId)
   const next = autoStatus(current, watchedCount(watched, counts), totalEpisodes(counts), tv.ended)
   if (next) await updateUserTitle({ id: tvId, type: 'tv' }, userId, statusPatch(next))
+}
+
+const LEARN_BATCH = 3
+
+/**
+ * Relève le numéro du premier épisode des saisons qui n'en ont pas encore (numérotation continue, ex. Hunter x Hunter)
+ * et l'enregistre. Renvoie vrai si au moins un numéro a été enregistré. Les saisons en échec seront retentées plus tard.
+ */
+export async function learnSeasonFirsts(qc: QueryClient, tvId: number, counts: SeasonCount[]): Promise<boolean> {
+  const missing = seasonsMissingFirst(counts)
+  if (missing.length === 0) return false
+
+  const firsts = new Map<number, number>()
+  for (let i = 0; i < missing.length; i += LEARN_BATCH) {
+    const batch = missing.slice(i, i + LEARN_BATCH)
+    const settled = await Promise.allSettled(batch.map((season) => loadSeason(qc, tvId, season)))
+    settled.forEach((entry, index) => {
+      if (entry.status !== 'fulfilled') return
+      const first = firstEpisodeNumber(entry.value)
+      if (first !== null) firsts.set(batch[index] as number, first)
+    })
+  }
+  if (firsts.size === 0) return false
+  await saveSeasonFirsts(tvId, firsts)
+  return true
 }
 
 export { setEpisodesWatched }

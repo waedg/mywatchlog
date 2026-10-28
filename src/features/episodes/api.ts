@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import type { Json } from '@/lib/database.types'
 
-import { epKey, type EpisodeRef, type SeasonCount, type WatchedRecord } from './progress'
+import { epKey, mergeFirsts, parseSeasonCounts, type EpisodeRef, type SeasonCount, type WatchedRecord } from './progress'
 
 const PAGE = 1000
 const CHUNK = 500
@@ -84,11 +84,32 @@ export async function setEpisodesWatched(
   }
 }
 
-/** Met à jour les compteurs de saisons mis en cache dans `titles`. */
-export async function syncTvMeta(tvId: number, counts: SeasonCount[], ended: boolean): Promise<void> {
+async function fetchSeasonCounts(tvId: number): Promise<SeasonCount[]> {
+  const { data, error } = await supabase.from('titles').select('season_counts').eq('id', tvId).eq('type', 'tv').maybeSingle()
+  if (error) throw error
+  return parseSeasonCounts(data?.season_counts)
+}
+
+/** Met à jour les compteurs de saisons mis en cache dans `titles` (en conservant les numéros de premier épisode relevés). */
+export async function syncTvMeta(tvId: number, counts: SeasonCount[], ended: boolean): Promise<SeasonCount[]> {
+  const merged = mergeFirsts(counts, await fetchSeasonCounts(tvId))
   const { error } = await supabase
     .from('titles')
-    .update({ season_counts: counts as Json, is_ended: ended, updated_at: new Date().toISOString() })
+    .update({ season_counts: merged as Json, is_ended: ended, updated_at: new Date().toISOString() })
+    .eq('id', tvId)
+    .eq('type', 'tv')
+  if (error) throw error
+  return merged
+}
+
+/** Enregistre le numéro du premier épisode de saisons (saison -> numéro). */
+export async function saveSeasonFirsts(tvId: number, firsts: Map<number, number>): Promise<void> {
+  const next = (await fetchSeasonCounts(tvId)).map((count) =>
+    firsts.has(count.season) ? { ...count, first: firsts.get(count.season) as number } : count,
+  )
+  const { error } = await supabase
+    .from('titles')
+    .update({ season_counts: next as Json, updated_at: new Date().toISOString() })
     .eq('id', tvId)
     .eq('type', 'tv')
   if (error) throw error
