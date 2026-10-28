@@ -33,6 +33,7 @@ Une décision validée n'est modifiée que par une nouvelle entrée qui la rempl
 | D-27 | 2026-10-28 | `vercel.json` : réécriture SPA vers `/index.html` pour tout chemin hors `/api/` | Routes React Router (`/login`, `/search`, `/library`) accessibles en accès direct | |
 | D-28 | 2026-10-28 | Accent jaune « sous-titres » oklch(0.88 0.18 95) avec texte noir sur l'accent ; fonds neutres (teinte 100) à la place des fonds violets | Demande de l'utilisateur | D-26 (accent) |
 | D-29 | 2026-10-28 | Authentification : OAuth Google via Supabase (`prompt=select_account`, retour sur `/library`), session persistante, contrôle `is_allowed()` après connexion ; statuts `loading`, `signed-out`, `allowed`, `denied`, `error` (fonction pure testée) ; routes protégées par `RequireAuth` | Application publique à accès restreint (D-17) | |
+| D-30 | 2026-10-28 | Types partagés dans `shared/tmdb-types.ts` (import `import type` uniquement, effacé à la compilation) ; appels `/api/tmdb` avec le jeton de session ; recherche : saisie avec délai de 350 ms, minimum 2 caractères, filtres Tout / Films / Séries côté client | Pas de duplication de types, moins d'appels TMDB | |
 
 ## Modèle d'entrée
 

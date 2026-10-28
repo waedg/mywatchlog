@@ -19,7 +19,10 @@ Statuts : `Ouvert`, `En cours`, `Résolu`, `Abandonné`.
 | B-028 | VERIF | `npm audit` : vulnérabilité deepmerge via vite-plugin-pwa, workbox-build (outils de build, pas de code envoyé au navigateur). Ne pas appliquer `audit fix --force` (rétrograde vite-plugin-pwa). Réévaluer en phase 4 | 4 | P3 | Ouvert |
 | B-029 | TODO | Tester `/api/tmdb` avec un jeton utilisateur réel (recherche, détails film et série, `imdb_id`) une fois la connexion Google en place | 1 | P1 | Ouvert |
 | B-030 | VERIF | Valider visuellement le rendu (accent jaune, thème sombre, navigation basse mobile) sur le téléphone de l'utilisateur et ajuster | 1 | P2 | Résolu (validé par l'utilisateur) |
-| B-031 | VERIF | Tester la connexion Google de bout en bout : compte autorisé (accès à Ma liste, déconnexion) et, si possible, compte non autorisé (écran « Accès non autorisé ») | 1 | P1 | Ouvert |
+| B-031 | VERIF | Tester la connexion Google de bout en bout : compte autorisé (accès à Ma liste, déconnexion) et, si possible, compte non autorisé (écran « Accès non autorisé ») | 1 | P1 | Résolu (compte autorisé validé par l'utilisateur) |
+| B-032 | DEC | Clé composite (id, type) pour `titles` et `user_titles` : TMDB numérote films et séries séparément, un même identifiant peut désigner un film et une série. Migration 002 à valider (tables vides) | 1 | P1 | Ouvert |
+| B-033 | TODO | Bouton « Ajouter » sur les cartes de recherche, ajout à la liste, indicateur « Dans ma liste » (dépend de B-032) | 1 | P1 | Ouvert |
+| B-034 | TODO | Documenter le test local de `/api` (la fonction n'est pas servie par `vite dev`, utiliser `vercel dev`) dans le README | 1 | P3 | Ouvert |
 
 ## Points à vérifier
 

@@ -3,33 +3,11 @@
 // - Le token TMDB (TMDB_READ_TOKEN) n'est lu que côté serveur.
 // - Langue : fr-FR, repli sur en-US quand le synopsis ou le titre est vide.
 
+import type { MediaType, SearchResult, TitleDetails } from '../shared/tmdb-types'
+
 const TMDB_BASE = 'https://api.themoviedb.org/3'
 const LANG_PRIMARY = 'fr-FR'
 const LANG_FALLBACK = 'en-US'
-
-export type MediaType = 'movie' | 'tv'
-
-export interface SearchResult {
-  id: number
-  type: MediaType
-  title: string
-  year: number | null
-  posterPath: string | null
-  overview: string
-}
-
-export interface TitleDetails {
-  id: number
-  type: MediaType
-  imdbId: string | null
-  title: string
-  originalTitle: string
-  year: number | null
-  posterPath: string | null
-  overview: string
-  genres: string[]
-  voteAverage: number | null
-}
 
 interface TmdbItem {
   id?: number
