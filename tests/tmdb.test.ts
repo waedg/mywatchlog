@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mapDetails, mapSearchItem, mapSeason, mapTvInfo, yearFrom } from '../api/tmdb'
+import { mapCast, mapDetails, mapNextEpisode, mapPerson, mapPersonCredits, mapProviders, mapSearchItem, mapSeason, mapTvInfo, yearFrom } from '../api/tmdb'
 
 describe('yearFrom', () => {
   it('extrait l’année d’une date ISO', () => {
@@ -145,5 +145,90 @@ describe('mapSeason', () => {
       { episodeNumber: 1, name: 'Pilote', airDate: '2008-01-20', runtime: 58 },
       { episodeNumber: 2, name: 'Épisode 2', airDate: null, runtime: null },
     ])
+  })
+})
+
+describe('mapCast / mapNextEpisode (détails)', () => {
+  it('trie le casting par ordre, limite à 12 et ignore les entrées invalides', () => {
+    const cast = Array.from({ length: 15 }, (_, i) => ({ id: i + 1, name: `Acteur ${i + 1}`, character: ' Rôle ', order: 15 - i }))
+    const result = mapCast([...cast, { name: 'sans id' }, { id: 99, name: '  ' }])
+    expect(result).toHaveLength(12)
+    expect(result[0]?.id).toBe(15)
+    expect(result[0]?.character).toBe('Rôle')
+    expect(result[0]?.profilePath).toBeNull()
+    expect(mapCast(undefined)).toEqual([])
+  })
+  it('lit le prochain épisode et ignore les données incomplètes', () => {
+    expect(mapNextEpisode({ season_number: 2, episode_number: 5, name: '', air_date: '2026-11-04' })).toEqual({
+      seasonNumber: 2,
+      episodeNumber: 5,
+      name: 'Épisode 5',
+      airDate: '2026-11-04',
+    })
+    expect(mapNextEpisode({ season_number: 2, episode_number: 5 })).toBeNull()
+    expect(mapNextEpisode(null)).toBeNull()
+  })
+  it('mapDetails expose date de sortie, prochain épisode et casting', () => {
+    const tv = mapDetails('tv', {
+      id: 1,
+      name: 'S',
+      first_air_date: '2020-01-01',
+      next_episode_to_air: { season_number: 1, episode_number: 2, air_date: '2026-12-01' },
+      credits: { cast: [{ id: 7, name: 'A', order: 0 }] },
+    })
+    expect(tv.releaseDate).toBe('2020-01-01')
+    expect(tv.nextEpisode?.airDate).toBe('2026-12-01')
+    expect(tv.cast).toHaveLength(1)
+    const movie = mapDetails('movie', { id: 2, title: 'F', release_date: '' })
+    expect(movie.releaseDate).toBeNull()
+    expect(movie.nextEpisode).toBeNull()
+  })
+})
+
+describe('mapProviders', () => {
+  const data = {
+    results: {
+      FR: {
+        flatrate: [
+          { provider_id: 8, provider_name: 'Netflix', logo_path: '/n.jpg', display_priority: 2 },
+          { provider_id: 119, provider_name: 'Prime Video', logo_path: '/p.jpg', display_priority: 1 },
+          { provider_id: 8, provider_name: 'Netflix (doublon)', display_priority: 3 },
+        ],
+        rent: [{ provider_id: 2, provider_name: 'Apple TV', logo_path: null }],
+      },
+    },
+  }
+  it('trie par priorité, dédoublonne et sépare abonnement, location, achat', () => {
+    const result = mapProviders('FR', data)
+    expect(result.available).toBe(true)
+    expect(result.flatrate.map((p) => p.name)).toEqual(['Prime Video', 'Netflix'])
+    expect(result.rent).toHaveLength(1)
+    expect(result.buy).toEqual([])
+  })
+  it('signale un pays sans données', () => {
+    const result = mapProviders('BE', data)
+    expect(result.available).toBe(false)
+    expect(result.flatrate).toEqual([])
+  })
+})
+
+describe('mapPerson / mapPersonCredits', () => {
+  const cast = [
+    { id: 1, media_type: 'movie', title: 'Ancien', release_date: '2001-05-01', character: 'Jim' },
+    { id: 2, media_type: 'tv', name: 'Récent', first_air_date: '2024-02-02', character: ' Eve ' },
+    { id: 3, media_type: 'tv', name: 'Talk-show', first_air_date: '2025-01-01', genre_ids: [10767], character: 'Self' },
+    { id: 1, media_type: 'movie', title: 'Ancien', release_date: '2001-05-01' },
+    { id: 4, media_type: 'movie', title: 'Annoncé', release_date: '' },
+    { id: 5, media_type: 'person', name: 'ignoré' },
+  ]
+  it('filtre, dédoublonne et trie la filmographie', () => {
+    const credits = mapPersonCredits(cast)
+    expect(credits.map((c) => c.title)).toEqual(['Annoncé', 'Récent', 'Ancien'])
+    expect(credits[1]).toMatchObject({ id: 2, type: 'tv', year: 2024, character: 'Eve' })
+  })
+  it('utilise la biographie de repli quand celle en français est vide', () => {
+    const person = mapPerson({ id: 9, name: 'Nom', biography: '  ' }, { biography: 'English bio' })
+    expect(person.biography).toBe('English bio')
+    expect(mapPerson({ id: 9, name: 'Nom', biography: 'Bio', birthday: '' }).birthday).toBeNull()
   })
 })

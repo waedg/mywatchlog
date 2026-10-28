@@ -1,4 +1,4 @@
-import { Clapperboard, Info, Library, LogOut, Search, WifiOff } from 'lucide-react'
+import { CalendarDays, Clapperboard, Info, Library, LogOut, Search, WifiOff } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 const links = [
   { to: '/search', label: 'Recherche', icon: Search },
   { to: '/library', label: 'Ma liste', icon: Library },
+  { to: '/upcoming', label: 'Sorties', icon: CalendarDays },
   { to: '/about', label: 'À propos', icon: Info },
 ]
 
@@ -72,7 +73,7 @@ export default function AppLayout() {
         className="fixed inset-x-0 bottom-0 z-20 border-t bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
         aria-label="Navigation principale"
       >
-        <div className="mx-auto grid max-w-md grid-cols-3">
+        <div className="mx-auto grid max-w-md grid-cols-4">
           {links.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}

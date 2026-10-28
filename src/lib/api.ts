@@ -1,4 +1,4 @@
-import type { MediaType, SearchResponse, SeasonDetails, TitleDetails } from '../../shared/tmdb-types'
+import type { MediaType, PersonDetails, ProvidersResponse, SearchResponse, SeasonDetails, TitleDetails } from '../../shared/tmdb-types'
 
 import { ApiError } from './api-error'
 import { supabase } from './supabase'
@@ -29,4 +29,12 @@ export function getTitleDetails(type: MediaType, id: number, signal?: AbortSigna
 
 export function getSeason(tvId: number, seasonNumber: number, signal?: AbortSignal): Promise<SeasonDetails> {
   return tmdbRequest<SeasonDetails>({ action: 'season', id: String(tvId), season: String(seasonNumber) }, signal)
+}
+
+export function getProviders(type: MediaType, id: number, region: string, signal?: AbortSignal): Promise<ProvidersResponse> {
+  return tmdbRequest<ProvidersResponse>({ action: 'providers', type, id: String(id), region }, signal)
+}
+
+export function getPerson(id: number, signal?: AbortSignal): Promise<PersonDetails> {
+  return tmdbRequest<PersonDetails>({ action: 'person', id: String(id) }, signal)
 }

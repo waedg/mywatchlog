@@ -7,6 +7,8 @@ import EmptyState from '@/components/layout/EmptyState'
 import FullScreenLoader from '@/components/layout/FullScreenLoader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import Cast from '@/features/credits/Cast'
+import Providers from '@/features/providers/Providers'
 import EpisodeTracker from '@/features/episodes/EpisodeTracker'
 import { sameSeasonCounts, toSeasonCounts } from '@/features/episodes/progress'
 import { syncTvMeta } from '@/features/episodes/api'
@@ -127,12 +129,20 @@ function TitleDetail({ type, id }: { type: MediaType; id: number }) {
               </Button>
             )}
 
+            <Providers type={type} id={id} />
+
             {entry ? <Actions entry={entry} /> : <AddToLibraryButton item={{ id, type }} inLibrary={false} />}
           </div>
 
           {entry && details.data.tv && (
             <div className="md:col-span-2">
               <EpisodeTracker tvId={id} tv={details.data.tv} watched={watched.data?.get(id) ?? new Set<string>()} />
+            </div>
+          )}
+
+          {details.data.cast.length > 0 && (
+            <div className="md:col-span-2">
+              <Cast cast={details.data.cast} />
             </div>
           )}
         </div>

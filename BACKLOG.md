@@ -29,7 +29,7 @@ Statuts : `Ouvert`, `En cours`, `Résolu`, `Abandonné`.
 | ID | Type | Sujet | Phase cible | Prio | Statut |
 |---|---|---|---|---|---|
 | B-010 | VERIF | Limites de débit de l'API TMDB (page « Rate Limiting » non lue) | 1 | P2 | Résolu (D-25) |
-| B-011 | VERIF | Mention d'attribution obligatoire pour les données « où regarder » (JustWatch) | 5 | P2 | Ouvert |
+| B-011 | VERIF | Mention d'attribution obligatoire pour les données « où regarder » (JustWatch) | 5 | P2 | Résolu |
 | B-012 | VERIF | Politique de mise en pause des projets Supabase gratuits (délai d'inactivité) | 0 | P2 | Ouvert |
 | B-013 | VERIF | Disponibilité de l'identifiant IMDb via `external_ids` pour films et séries | 1 | P3 | Ouvert |
 | B-014 | VERIF | Fiabilité des notifications push d'une PWA sur Android | 6 | P3 | Ouvert |
@@ -63,3 +63,6 @@ Aucun pour l'instant.
 | B-041 | TODO | Ajouter le logo officiel TMDB sur la page À propos (fichier non récupérable depuis l'environnement : à fournir, depuis themoviedb.org/about/logos-attribution) ; il doit rester moins visible que le logo de l'application | 4 | P2 | Ouvert |
 | B-042 | TODO | Écritures hors connexion (cocher des épisodes puis synchroniser plus tard) : non prévu, à étudier si le besoin apparaît | 5 | P3 | Ouvert |
 | B-043 | TODO | Icône personnalisée à remplacer par une image fournie par l'utilisateur (décision 2 : « pour le moment ») | 4 | P3 | Ouvert |
+| B-044 | TODO | Sorties : calcul côté serveur par tâche planifiée (clé service_role dans Vercel) si le chargement devient long avec une grosse liste ; à grouper avec les notifications (phase 6) | 6 | P3 | Ouvert |
+| B-045 | TODO | Sorties hors connexion : les détails ne sont pas dans le cache persistant (la page affiche « Hors connexion ») | 5 | P3 | Ouvert |
+| B-046 | TODO | Suivi d'acteurs et plateformes personnelles (« disponible sur ton abonnement ») : écartés pour l'instant (décisions 3 et 4) | 6 | P3 | Ouvert |

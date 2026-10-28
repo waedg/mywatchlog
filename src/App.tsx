@@ -5,8 +5,10 @@ import AppLayout from '@/components/layout/AppLayout'
 import RequireAuth from '@/features/auth/RequireAuth'
 import LibraryPage from '@/pages/LibraryPage'
 import LoginPage from '@/pages/LoginPage'
+import PersonPage from '@/pages/PersonPage'
 import SearchPage from '@/pages/SearchPage'
 import TitleDetailPage from '@/pages/TitleDetailPage'
+import UpcomingPage from '@/pages/UpcomingPage'
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/search" element={<SearchPage />} />
             <Route path="/library" element={<LibraryPage />} />
+            <Route path="/upcoming" element={<UpcomingPage />} />
+            <Route path="/person/:id" element={<PersonPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/title/:type/:id" element={<TitleDetailPage />} />
           </Route>

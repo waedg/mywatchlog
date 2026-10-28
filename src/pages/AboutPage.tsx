@@ -3,6 +3,8 @@ import { Download, ExternalLink, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/auth-context'
 import { isStandalone, useInstall } from '@/lib/install-prompt'
+import { REGIONS, regionName } from '@/lib/region'
+import { useRegion } from '@/lib/use-region'
 
 const CONTACT = 'goumani.waed@gmail.com'
 
@@ -19,6 +21,8 @@ export default function AboutPage() {
   const { session } = useAuth()
   const { canInstall, installed, install } = useInstall()
   const standalone = isStandalone()
+  const [region, setRegion] = useRegion()
+  const regions = [...REGIONS].sort((a, b) => regionName(a).localeCompare(regionName(b), 'fr'))
 
   return (
     <section className="max-w-2xl space-y-6">
@@ -51,6 +55,24 @@ export default function AboutPage() {
         {(standalone || installed) && <p className="text-sm text-muted-foreground">Application installée.</p>}
       </Section>
 
+      <Section title="Plateformes de streaming">
+        <p className="text-sm text-muted-foreground">
+          Pays utilisé pour afficher où regarder un film ou une série. Ce choix est enregistré sur cet appareil.
+        </p>
+        <select
+          aria-label="Pays des plateformes de streaming"
+          value={region}
+          onChange={(event) => setRegion(event.target.value)}
+          className="h-11 w-full max-w-xs rounded-lg border border-input bg-secondary/40 px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 md:text-sm"
+        >
+          {regions.map((code) => (
+            <option key={code} value={code} className="bg-background">
+              {regionName(code)}
+            </option>
+          ))}
+        </select>
+      </Section>
+
       <Section title="Développeur et contact">
         <p className="text-sm">Développé par Waed Goumani.</p>
         <Button variant="outline" size="sm" asChild>
@@ -75,6 +97,13 @@ export default function AboutPage() {
             themoviedb.org
           </a>
         </Button>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Les données de disponibilité sur les plateformes de streaming sont fournies par{' '}
+          <a href="https://www.justwatch.com" target="_blank" rel="noreferrer" className="underline underline-offset-2">
+            JustWatch
+          </a>
+          .
+        </p>
         <p className="text-xs text-muted-foreground">
           Les liens « Voir sur IMDb » ouvrent le site IMDb, qui n'est pas affilié à cette application.
         </p>
