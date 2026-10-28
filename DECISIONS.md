@@ -34,6 +34,7 @@ Une décision validée n'est modifiée que par une nouvelle entrée qui la rempl
 | D-28 | 2026-10-28 | Accent jaune « sous-titres » oklch(0.88 0.18 95) avec texte noir sur l'accent ; fonds neutres (teinte 100) à la place des fonds violets | Demande de l'utilisateur | D-26 (accent) |
 | D-29 | 2026-10-28 | Authentification : OAuth Google via Supabase (`prompt=select_account`, retour sur `/library`), session persistante, contrôle `is_allowed()` après connexion ; statuts `loading`, `signed-out`, `allowed`, `denied`, `error` (fonction pure testée) ; routes protégées par `RequireAuth` | Application publique à accès restreint (D-17) | |
 | D-30 | 2026-10-28 | Types partagés dans `shared/tmdb-types.ts` (import `import type` uniquement, effacé à la compilation) ; appels `/api/tmdb` avec le jeton de session ; recherche : saisie avec délai de 350 ms, minimum 2 caractères, filtres Tout / Films / Séries côté client | Pas de duplication de types, moins d'appels TMDB | |
+| D-31 | 2026-10-28 | Migration 002 : clé composite (id, type) sur `titles`, `user_titles` (user_id, title_id, title_type) avec FK composite ; ajout : détails TMDB puis upsert `titles` puis insert `user_titles` (statut « à regarder », doublons ignorés) ; liste groupée En cours / À regarder / Vu | Les ids TMDB films et séries sont deux espaces distincts | |
 
 ## Modèle d'entrée
 

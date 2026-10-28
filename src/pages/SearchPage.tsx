@@ -6,6 +6,9 @@ import PosterCard from '@/components/PosterCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import AddToLibraryButton from '@/features/library/AddToLibraryButton'
+import { libraryKey } from '@/features/library/group'
+import { useLibrary } from '@/features/library/useLibrary'
 import { MIN_QUERY_LENGTH, useSearch } from '@/features/search/useSearch'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { apiErrorMessage } from '@/lib/api-error'
@@ -26,6 +29,8 @@ export default function SearchPage() {
   const [filter, setFilter] = useState<Filter>('all')
   const debounced = useDebouncedValue(input)
   const search = useSearch(debounced)
+  const library = useLibrary()
+  const owned = new Set((library.data ?? []).map((item) => libraryKey(item.type, item.id)))
 
   const trimmed = debounced.trim()
   const results = search.data?.results ?? []
@@ -131,6 +136,12 @@ export default function SearchPage() {
                   year={item.year}
                   type={item.type}
                   posterPath={item.posterPath}
+                  action={
+                    <AddToLibraryButton
+                      item={item}
+                      inLibrary={owned.has(libraryKey(item.type, item.id))}
+                    />
+                  }
                 />
               ))}
             </div>
