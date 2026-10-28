@@ -35,7 +35,7 @@ Cadrage complet : document « MyWatchlog : Cadrage du projet » (artifact Claude
 | 3 | Suivi épisode par épisode, prochain à voir | Terminée (testée le 2026-10-28), ajustements d'interface livrés (D-34) |
 | 4 | PWA Android, hors-ligne, mention TMDB | Terminée (testée le 2026-10-28), logo TMDB en place |
 | 5 | Sorties, calendrier, fiches acteurs, personnes suivies, où regarder | Terminée (testée le 2026-10-28) |
-| 6 | Notifications push, statistiques | À faire |
+| 6 | Notifications push, statistiques | En attente (décision du 2026-10-28) : découpage proposé (statistiques, notifications push, réglages), à relancer après la période d'utilisation |
 
 ## Checklist phase 0
 

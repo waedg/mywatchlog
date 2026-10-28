@@ -66,3 +66,4 @@ Aucun pour l'instant.
 | B-044 | TODO | Sorties : calcul côté serveur par tâche planifiée (clé service_role dans Vercel) si le chargement devient long avec une grosse liste ; à grouper avec les notifications (phase 6) | 6 | P3 | Ouvert |
 | B-045 | TODO | Sorties hors connexion : les détails ne sont pas dans le cache persistant (la page affiche « Hors connexion ») | 5 | P3 | Ouvert |
 | B-046 | TODO | Suivi d'acteurs et plateformes personnelles (« disponible sur ton abonnement ») : écartés pour l'instant (décisions 3 et 4) | 6 | P3 | Ouvert |
+| B-047 | DEC | Phase 6 en attente : statistiques (durées à stocker, migration 005), notifications push (clés VAPID, table d'abonnements, tâche planifiée, clé service_role à ajouter par l'utilisateur dans Vercel) ; à relancer après la période d'utilisation | 6 | P2 | En attente |
