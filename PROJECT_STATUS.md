@@ -29,7 +29,7 @@ Cadrage complet : document « MyWatchlog : Cadrage du projet » (artifact Claude
 
 | Phase | Contenu | Statut |
 |---|---|---|
-| 0 | Comptes, dépôt, squelette Vite + React + TS, déploiement Vercel | En cours (squelette poussé, projet Vercel à créer) |
+| 0 | Comptes, dépôt, squelette Vite + React + TS, déploiement Vercel | Terminée, en attente de validation (https://mywatchlog-delta.vercel.app/) |
 | 1 | Connexion Google, recherche TMDB, ajout à la liste | À faire |
 | 2 | Statuts, notes, favoris, films et séries séparés | À faire |
 | 3 | Suivi épisode par épisode, prochain à voir | À faire |
@@ -51,8 +51,9 @@ Côté Claude :
 
 - [x] Rattacher le dépôt et commiter les fichiers de cadrage
 - [x] Initialiser le squelette Vite + React + TypeScript (build et lint OK)
-- [ ] Créer le projet Vercel relié au dépôt
-- [ ] Configurer les variables d'environnement Vercel (`VITE_*` par Claude, `TMDB_READ_TOKEN` par l'utilisateur)
+- [x] Créer le projet Vercel relié au dépôt (fait par l'utilisateur : le connecteur Vercel n'a pas accès à son espace)
+- [x] Variables `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` saisies dans Vercel (déclaré par l'utilisateur)
+- [ ] `TMDB_READ_TOKEN` à saisir par l'utilisateur dans Vercel (phase 1)
 
 ## Variables d'environnement prévues
 
@@ -71,4 +72,4 @@ CRON_SECRET=
 
 | Date | Résumé |
 |---|---|
-| 2026-10-28 | Cadrage, choix du stack, 14 décisions validées, création des fichiers de suivi |
+| 2026-10-28 | Cadrage, choix du stack, 14 décisions validées, fichiers de suivi, squelette Vite poussé, premier déploiement Vercel en ligne |

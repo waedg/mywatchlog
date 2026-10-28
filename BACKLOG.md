@@ -31,8 +31,10 @@ Statuts : `Ouvert`, `En cours`, `Résolu`, `Abandonné`.
 |---|---|---|---|---|---|
 | B-020 | TODO | Créer le dépôt GitHub public `mywatchlog` (action utilisateur) | 0 | P1 | Résolu |
 | B-021 | TODO | Rattacher le dépôt à la session et commiter les fichiers de cadrage | 0 | P1 | Résolu |
-| B-022 | TODO | Créer le projet Vercel relié au dépôt | 0 | P1 | Ouvert |
+| B-022 | TODO | Créer le projet Vercel relié au dépôt | 0 | P1 | Résolu |
 | B-023 | TODO | Ajouter une page « À propos » avec mention et logo TMDB | 4 | P2 | Ouvert |
+| B-024 | TODO | Renseigner l'URL du site (https://mywatchlog-delta.vercel.app) et l'URI de redirection dans Supabase Auth (URL Configuration) | 1 | P1 | Ouvert |
+| B-025 | TODO | Accorder au connecteur Vercel l'accès à l'espace de l'utilisateur (403 sur le scope wago1) | 1 | P3 | Ouvert |
 
 ## Bugs
 
