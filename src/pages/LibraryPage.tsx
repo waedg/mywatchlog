@@ -1,14 +1,14 @@
-import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Heart, Library } from 'lucide-react'
 
 import EmptyState from '@/components/layout/EmptyState'
 import PosterCard from '@/components/PosterCard'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { groupByStatus, libraryKey, STATUS_LABELS, type TypeFilter } from '@/features/library/group'
+import { groupByStatus, libraryKey, parseTypeFilter, STATUS_LABELS, type TypeFilter } from '@/features/library/group'
 import TvProgress from '@/features/episodes/TvProgress'
 import { useWatched } from '@/features/episodes/useEpisodes'
-import QuickWatchedButton from '@/features/library/QuickWatchedButton'
+import QuickWatchedButton, { WatchedMark } from '@/features/library/QuickWatchedButton'
 import { useLibrary } from '@/features/library/useLibrary'
 import { cn } from '@/lib/utils'
 
@@ -21,8 +21,20 @@ const FILTERS: { value: TypeFilter; label: string }[] = [
 const GRID = 'grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
 
 export default function LibraryPage() {
-  const [filter, setFilter] = useState<TypeFilter>('all')
-  const [favoritesOnly, setFavoritesOnly] = useState(false)
+  // Filtres dans l'URL : le bouton retour restitue la même vue (D-34).
+  const [params, setParams] = useSearchParams()
+  const filter = parseTypeFilter(params.get('type'))
+  const favoritesOnly = params.get('fav') === '1'
+  const update = (key: string, value: string | null) =>
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current)
+        if (value) next.set(key, value)
+        else next.delete(key)
+        return next
+      },
+      { replace: true },
+    )
   const library = useLibrary()
   const watched = useWatched()
 
@@ -41,7 +53,7 @@ export default function LibraryPage() {
             variant={filter === value ? 'default' : 'outline'}
             className={cn('rounded-full', filter !== value && 'text-muted-foreground')}
             aria-pressed={filter === value}
-            onClick={() => setFilter(value)}
+            onClick={() => update('type', value === 'all' ? null : value)}
           >
             {label}
           </Button>
@@ -51,7 +63,7 @@ export default function LibraryPage() {
           variant={favoritesOnly ? 'default' : 'outline'}
           className={cn('rounded-full', !favoritesOnly && 'text-muted-foreground')}
           aria-pressed={favoritesOnly}
-          onClick={() => setFavoritesOnly((value) => !value)}
+          onClick={() => update('fav', favoritesOnly ? null : '1')}
         >
           <Heart />
           Favoris
@@ -106,12 +118,10 @@ export default function LibraryPage() {
                   type={item.type}
                   posterPath={item.posterPath}
                   to={`/title/${item.type}/${item.id}`}
-                  action={
-                    <>
-                      <TvProgress item={item} watched={watched.data?.get(item.id)} />
-                      {item.status !== 'watched' && <QuickWatchedButton id={item.id} type={item.type} />}
-                    </>
+                  overlay={
+                    item.status === 'watched' ? <WatchedMark /> : <QuickWatchedButton id={item.id} type={item.type} />
                   }
+                  action={<TvProgress item={item} watched={watched.data?.get(item.id)} />}
                 />
               ))}
             </div>

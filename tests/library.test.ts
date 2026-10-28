@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { groupByStatus, isStatus, isValidRating, libraryKey, statusPatch, type LibraryItem } from '../src/features/library/group'
+import { groupByStatus, isStatus, isValidRating, libraryKey, parseTypeFilter, statusPatch, type LibraryItem } from '../src/features/library/group'
 
 const make = (over: Partial<LibraryItem>): LibraryItem => ({
   id: 1,
@@ -83,5 +83,14 @@ describe('groupByStatus favoris et abandonnés', () => {
     const groups = groupByStatus(items, 'all', true)
     expect(groups.map((g) => g.status)).toEqual(['watched', 'dropped'])
     expect(groups[0]?.items).toHaveLength(1)
+  })
+})
+
+describe('parseTypeFilter', () => {
+  it('relit le filtre de l\'URL, Tout par défaut', () => {
+    expect(parseTypeFilter('movie')).toBe('movie')
+    expect(parseTypeFilter('tv')).toBe('tv')
+    expect(parseTypeFilter('autre')).toBe('all')
+    expect(parseTypeFilter(null)).toBe('all')
   })
 })

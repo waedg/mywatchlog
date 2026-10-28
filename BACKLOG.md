@@ -58,3 +58,5 @@ Aucun pour l'instant.
 | B-036 | TODO | Notes à la demi-étoile (0,5) si besoin : la colonne `rating` numeric(3,1) le permet, l'interface propose 1 à 10 entiers | 2 | P3 | Ouvert |
 | B-037 | TODO | Épisodes sans date de diffusion : non cochables en groupe (cochables à la main). À revoir si des séries anciennes posent problème | 3 | P3 | Ouvert |
 | B-038 | TODO | Fuseau horaire des dates de diffusion (B-004) : comparaison avec la date locale du navigateur | 3 | P3 | Ouvert |
+| B-039 | TODO | Restauration de la position de défilement au retour (non incluse : les listes se chargent de façon asynchrone) | 4 | P3 | Ouvert |
+| B-040 | TODO | « À jour » exact pour une série encore diffusée : le total inclut les épisodes annoncés non diffusés, donc 44/44 n'apparaît que si tous les épisodes listés sont vus | 4 | P3 | Ouvert |

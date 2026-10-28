@@ -15,14 +15,16 @@ interface PosterCardProps {
   action?: ReactNode
   /** Si fourni, l'affiche et le titre mènent à cette route (page de détail). */
   to?: string
+  /** Pastille en haut à droite de l'affiche (hors du lien). */
+  overlay?: ReactNode
 }
 
-export default function PosterCard({ title, year, type, posterPath, action, to }: PosterCardProps) {
+export default function PosterCard({ title, year, type, posterPath, action, to, overlay }: PosterCardProps) {
   const src = posterUrl(posterPath)
   const Icon = type === 'movie' ? Film : Tv
 
   return (
-    <article className="group flex flex-col gap-2">
+    <article className="group relative flex flex-col gap-2">
       <Wrapper to={to} className="flex flex-col gap-2">
       <div className="relative aspect-[2/3] overflow-hidden rounded-xl border bg-card shadow-sm transition-transform duration-200 group-hover:-translate-y-1">
         {src ? (
@@ -43,6 +45,7 @@ export default function PosterCard({ title, year, type, posterPath, action, to }
         <p className="text-xs text-muted-foreground">{year ?? 'Année inconnue'}</p>
       </div>
       </Wrapper>
+      {overlay && <div className="absolute right-2 top-2">{overlay}</div>}
       {action}
     </article>
   )

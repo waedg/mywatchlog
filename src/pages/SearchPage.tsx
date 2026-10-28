@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { SearchX, Search as SearchIcon, X } from 'lucide-react'
 
 import EmptyState from '@/components/layout/EmptyState'
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import AddToLibraryButton from '@/features/library/AddToLibraryButton'
-import { libraryKey } from '@/features/library/group'
+import { libraryKey, parseTypeFilter } from '@/features/library/group'
 import { useLibrary } from '@/features/library/useLibrary'
 import { MIN_QUERY_LENGTH, useSearch } from '@/features/search/useSearch'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
@@ -25,8 +25,22 @@ const FILTERS: { value: Filter; label: string }[] = [
 const GRID = 'grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
 
 export default function SearchPage() {
-  const [input, setInput] = useState('')
-  const [filter, setFilter] = useState<Filter>('all')
+  // Requête et filtre dans l'URL : le bouton retour restitue la même recherche (D-34).
+  const [params, setParams] = useSearchParams()
+  const input = params.get('q') ?? ''
+  const filter: Filter = parseTypeFilter(params.get('type'))
+  const update = (key: string, value: string | null) =>
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current)
+        if (value) next.set(key, value)
+        else next.delete(key)
+        return next
+      },
+      { replace: true },
+    )
+  const setInput = (value: string) => update('q', value || null)
+  const setFilter = (value: Filter) => update('type', value === 'all' ? null : value)
   const debounced = useDebouncedValue(input)
   const search = useSearch(debounced)
   const library = useLibrary()

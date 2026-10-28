@@ -7,6 +7,7 @@ import {
   isUpcoming,
   nextEpisode,
   parseSeasonCounts,
+  progressTone,
   sameSeasonCounts,
   selectAired,
   todayLocal,
@@ -105,5 +106,20 @@ describe('autoStatus', () => {
   })
   it('sans total connu, ne change rien', () => {
     expect(autoStatus('to_watch', 1, 0, true)).toBeNull()
+  })
+})
+
+describe('progressTone', () => {
+  it('abandonné -> rouge, quelle que soit la progression', () => {
+    expect(progressTone('dropped', 44, 44, true)).toBe('dropped')
+    expect(progressTone('dropped', 3, 44, false)).toBe('dropped')
+  })
+  it('tout vu : vert fluo si terminée, rayé si encore diffusée', () => {
+    expect(progressTone('watched', 44, 44, true)).toBe('ended')
+    expect(progressTone('watching', 44, 44, false)).toBe('caught-up')
+  })
+  it('sinon progression normale', () => {
+    expect(progressTone('watching', 10, 44, false)).toBe('progress')
+    expect(progressTone('to_watch', 0, 0, false)).toBe('progress')
   })
 })

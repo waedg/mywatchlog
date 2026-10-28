@@ -123,3 +123,16 @@ export function autoStatus(current: Status, watched: number, total: number, ende
   if (watched > 0 && current === 'to_watch') return 'watching'
   return null
 }
+
+export type ProgressTone = 'dropped' | 'ended' | 'caught-up' | 'progress'
+
+/**
+ * Aspect de la barre de progression (D-34) :
+ * abandonné -> rouge ; terminée et tout vu -> vert fluo ;
+ * tout vu sur une série encore diffusée -> jaune rayé ; sinon jaune.
+ */
+export function progressTone(status: Status, watched: number, total: number, ended: boolean): ProgressTone {
+  if (status === 'dropped') return 'dropped'
+  if (total > 0 && watched >= total) return ended ? 'ended' : 'caught-up'
+  return 'progress'
+}

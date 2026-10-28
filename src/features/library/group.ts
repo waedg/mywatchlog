@@ -64,3 +64,8 @@ export function statusPatch(
 export function isValidRating(value: number): boolean {
   return Number.isInteger(value) && value >= 1 && value <= 10
 }
+
+/** Relit le filtre de type depuis l'URL (valeur inconnue = Tout). */
+export function parseTypeFilter(value: string | null): TypeFilter {
+  return value === 'movie' || value === 'tv' ? value : 'all'
+}
