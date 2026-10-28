@@ -8,12 +8,13 @@ Statuts : `Ouvert`, `En cours`, `Résolu`, `Abandonné`.
 
 | ID | Type | Sujet | Phase cible | Prio | Statut |
 |---|---|---|---|---|---|
-| B-001 | DEC | Restreindre la connexion à l'adresse Google du propriétaire (liste d'autorisation ou inscriptions désactivées) | 1 | P1 | Ouvert |
+| B-001 | DEC | Restreindre la connexion à l'adresse Google du propriétaire (liste d'autorisation ou inscriptions désactivées) | 1 | P1 | Résolu (D-17) |
 | B-002 | DEC | Ajouter un statut « abandonné » (`dropped`) en plus de à voir / en cours / vu | 2 | P2 | Ouvert |
 | B-003 | DEC | Gestion des épisodes spéciaux (saison 0) et des saisons annoncées sans date | 3 | P2 | Ouvert |
 | B-004 | DEC | Fuseau horaire d'affichage des sorties (Europe/Paris) et gestion des dates TMDB | 5 | P3 | Ouvert |
-| B-005 | DEC | Stratégie de tests (unitaires, e2e) et niveau de couverture attendu | 1 | P3 | Ouvert |
-| B-006 | DEC | Bibliothèque de composants UI (Tailwind seul, ou ajout d'une bibliothèque) | 1 | P3 | Ouvert |
+| B-005 | DEC | Stratégie de tests (unitaires, e2e) et niveau de couverture attendu | 1 | P3 | Résolu (D-20) |
+| B-006 | DEC | Bibliothèque de composants UI : Tailwind seul écarté (D-21), choisir une bibliothèque moderne | 1 | P1 | Ouvert |
+| B-026 | DEC | Bloquer la création de compte non autorisé (hook « Before User Created » Supabase) | 2 | P3 | Ouvert |
 
 ## Points à vérifier
 

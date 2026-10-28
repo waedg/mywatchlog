@@ -20,6 +20,11 @@ Une décision validée n'est modifiée que par une nouvelle entrée qui la rempl
 | D-14 | 2026-10-28 | Validation de l'utilisateur avant chaque phase, aucun code sans accord | Consigne du projet | |
 | D-15 | 2026-10-28 | Versions figées par `package-lock.json` au 2026-10-28 : Node 22.23.4, Vite 8.3.5, React 19.3.1, TypeScript 7.0.2, Tailwind 4.3.3, supabase-js 2.118.0, TanStack Query 5.105.0, React Router 7.18.5, vite-plugin-pwa 2.0.0 | Reproductibilité du squelette de la phase 0 | |
 | D-16 | 2026-10-28 | Projet Supabase `mywatchlog` en région eu-west-1 (Irlande, UE), Postgres 17 | Région UE respectée | |
+| D-17 | 2026-10-28 | Accès restreint par liste d'autorisation (table `allowed_emails`, adresse hors dépôt, RLS via `is_allowed()`) | Application publique, données personnelles | |
+| D-18 | 2026-10-28 | Pas de hook « Before User Created » en phase 1 (suivi en B-026) | Protection des données déjà assurée par la RLS | |
+| D-19 | 2026-10-28 | Interface en français uniquement (phase 1) | Simplicité, usage perso | |
+| D-20 | 2026-10-28 | Tests : Vitest pour les fonctions pures, tests manuels sur le déploiement, pas d'e2e | Effort proportionné à un projet perso | |
+| D-21 | 2026-10-28 | Interface moderne et attractive exigée : Tailwind seul écarté, bibliothèque de composants à choisir (B-006) | Exigence de l'utilisateur | |
 
 ## Modèle d'entrée
 
