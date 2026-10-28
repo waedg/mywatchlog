@@ -67,3 +67,4 @@ Aucun pour l'instant.
 | B-045 | TODO | Sorties hors connexion : les détails ne sont pas dans le cache persistant (la page affiche « Hors connexion ») | 5 | P3 | Ouvert |
 | B-046 | TODO | Suivi d'acteurs et plateformes personnelles (« disponible sur ton abonnement ») : écartés pour l'instant (décisions 3 et 4) | 6 | P3 | Ouvert |
 | B-047 | DEC | Phase 6 en attente : statistiques (durées à stocker, migration 005), notifications push (clés VAPID, table d'abonnements, tâche planifiée, clé service_role à ajouter par l'utilisateur dans Vercel) ; à relancer après la période d'utilisation | 6 | P2 | En attente |
+| B-048 | BUG | Fiche : le casting défilait horizontalement au lieu de s'adapter à l'écran. Corrigé : grille responsive (3, 4, 5 puis 6 colonnes), garde-fous de largeur dans la mise en page de la fiche | 5 | P2 | Résolu |

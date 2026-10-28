@@ -91,7 +91,7 @@ function TitleDetail({ type, id }: { type: MediaType; id: number }) {
         <div className="grid gap-6 md:grid-cols-[240px_1fr]">
           <Poster title={details.data.title} path={details.data.posterPath} />
 
-          <div className="space-y-5">
+          <div className="min-w-0 space-y-5">
             <div className="space-y-2">
               <h1 className="text-2xl font-bold tracking-tight">{details.data.title}</h1>
               {details.data.originalTitle !== details.data.title && (
@@ -135,13 +135,13 @@ function TitleDetail({ type, id }: { type: MediaType; id: number }) {
           </div>
 
           {entry && details.data.tv && (
-            <div className="md:col-span-2">
+            <div className="min-w-0 md:col-span-2">
               <EpisodeTracker tvId={id} tv={details.data.tv} watched={watched.data?.get(id) ?? new Set<string>()} />
             </div>
           )}
 
           {details.data.cast.length > 0 && (
-            <div className="md:col-span-2">
+            <div className="min-w-0 md:col-span-2">
               <Cast cast={details.data.cast} />
             </div>
           )}
