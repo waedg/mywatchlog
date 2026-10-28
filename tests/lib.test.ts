@@ -28,3 +28,11 @@ describe('apiErrorMessage', () => {
     expect(apiErrorMessage(null)).toContain('erreur')
   })
 })
+
+import { OfflineError } from '../src/lib/api-error'
+
+describe('OfflineError', () => {
+  it('donne un message dédié hors connexion', () => {
+    expect(apiErrorMessage(new OfflineError())).toContain('Hors connexion')
+  })
+})

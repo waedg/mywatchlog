@@ -27,6 +27,8 @@ export function loadSeason(qc: QueryClient, tvId: number, season: number): Promi
     queryKey: seasonKey(tvId, season),
     queryFn: ({ signal }) => getSeason(tvId, season, signal),
     staleTime: SEASON_STALE,
+    // Hors connexion : échoue au lieu de rester en pause indéfiniment (la mutation appelante resterait « en cours »).
+    networkMode: 'always',
   })
 }
 
@@ -36,6 +38,7 @@ export async function loadTv(qc: QueryClient, tvId: number): Promise<TitleDetail
     queryKey: detailsKey(tvId),
     queryFn: ({ signal }) => getTitleDetails('tv', tvId, signal),
     staleTime: DETAILS_STALE,
+    networkMode: 'always',
   })
   if (!details.tv) throw new Error('Série sans informations de saisons')
   return details as TitleDetails & { tv: TvInfo }

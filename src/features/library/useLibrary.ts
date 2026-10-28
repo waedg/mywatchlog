@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { useAuth } from '@/features/auth/auth-context'
+import { assertOnline } from '@/lib/online'
 import type { SearchResult } from '../../../shared/tmdb-types'
 
 import {
@@ -31,6 +32,7 @@ export function useAddToLibrary() {
 
   return useMutation({
     mutationFn: async (item: Pick<SearchResult, 'id' | 'type'>) => {
+      assertOnline()
       const userId = session?.user.id
       if (!userId) throw new Error('Session absente')
       await addToLibrary(item, userId)
@@ -44,7 +46,10 @@ export function useUpdateUserTitle(ref: TitleRef) {
   const userId = useUserId()
 
   return useMutation({
-    mutationFn: (patch: UserTitlePatch) => updateUserTitle(ref, userId, patch),
+    mutationFn: async (patch: UserTitlePatch) => {
+      assertOnline()
+      await updateUserTitle(ref, userId, patch)
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: LIBRARY_KEY }),
   })
 }
@@ -54,7 +59,10 @@ export function useRemoveFromLibrary(ref: TitleRef) {
   const userId = useUserId()
 
   return useMutation({
-    mutationFn: () => removeFromLibrary(ref, userId),
+    mutationFn: async () => {
+      assertOnline()
+      await removeFromLibrary(ref, userId)
+    },
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: LIBRARY_KEY }),

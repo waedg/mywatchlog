@@ -9,8 +9,16 @@ export class ApiError extends Error {
   }
 }
 
+/** Écriture refusée parce que l'appareil est hors connexion (les modifications ne sont pas mises en file d'attente, B-042). */
+export class OfflineError extends Error {
+  constructor() {
+    super('Hors connexion')
+  }
+}
+
 /** Message affichable en français pour une erreur d'appel à l'API. */
 export function apiErrorMessage(error: unknown): string {
+  if (error instanceof OfflineError) return 'Hors connexion : cette modification nécessite internet. Réessaie une fois reconnecté.'
   if (error instanceof ApiError) {
     if (error.status === 401) return 'Ta session a expiré. Reconnecte-toi puis réessaie.'
     if (error.status === 403) return "Ce compte n'est pas autorisé à utiliser l'application."

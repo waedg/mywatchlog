@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { useAuth } from '@/features/auth/auth-context'
+import { assertOnline } from '@/lib/online'
 
 import { fetchAllWatched } from './api'
 import { toWatchedMap } from './progress'
@@ -20,6 +21,7 @@ export function useEpisodeActions(tvId: number) {
 
   const mutation = useMutation({
     mutationFn: async (change: () => Promise<void>) => {
+      assertOnline()
       if (!userId) throw new Error('Session absente')
       await change()
       await reconcile(queryClient, userId, tvId)

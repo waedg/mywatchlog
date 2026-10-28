@@ -47,6 +47,7 @@ Une décision validée n'est modifiée que par une nouvelle entrée qui la rempl
 | D-41 | 2026-10-28 | Phase 8 : entrée de navigation « Découvrir » (page Recherche inchangée) ; « Que regarder ce soir ? » en section de Découvrir ; sources de « Pour toi » = notes ≥ 8 + favoris hors « Abandonné » (les « Vu » sans note exclus) ; pas de migration 006 | Réponses de l'utilisateur | |
 | D-42 | 2026-10-28 | Phase 8.1 : listes TMDB servies avec `Cache-Control: private, max-age=3600` (genres 24 h), jamais `s-maxage` ; « Pour toi » (`forYou`) en `no-store`, mis en cache côté client | Un cache CDN partagé servirait la réponse sans passer par la liste d'autorisation (is_allowed) | |
 | D-43 | 2026-10-28 | Pastille « Vu » d'une carte cliquable : remet le titre à « À regarder » (film et série ; note, favori et épisodes conservés ; sans confirmation) | Demande de l'utilisateur (option C pour les séries : seul le statut change ; il se recalcule au prochain épisode coché ou décoché) | |
+| D-44 | 2026-10-28 | Écritures refusées immédiatement hors connexion (`assertOnline`, message dédié) ; chargements de saisons / détails en `networkMode: 'always'` pour échouer au lieu de rester en pause | Bug : « décocher la saison » tournait sans fin hors ligne (requête TMDB en pause dans la mutation). Les modifications hors-ligne restent non prises en charge (B-042) | |
 
 ## Modèle d'entrée
 
