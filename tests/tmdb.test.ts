@@ -1,5 +1,22 @@
 import { describe, expect, it } from 'vitest'
-import { mapCast, mapDetails, mapNextEpisode, mapPerson, mapPersonCredits, mapProviders, mapSearchItem, mapSeason, mapTvInfo, yearFrom } from '../api/tmdb'
+import {
+  aggregateRecommendations,
+  buildDiscoverParams,
+  mapCast,
+  mapDetails,
+  mapGenres,
+  mapList,
+  mapListItem,
+  mapNextEpisode,
+  mapPerson,
+  mapPersonCredits,
+  mapProviders,
+  mapSearchItem,
+  mapSeason,
+  mapTvInfo,
+  parseSources,
+  yearFrom,
+} from '../api/tmdb'
 
 describe('yearFrom', () => {
   it('extrait l’année d’une date ISO', () => {
@@ -230,5 +247,130 @@ describe('mapPerson / mapPersonCredits', () => {
     const person = mapPerson({ id: 9, name: 'Nom', biography: '  ' }, { biography: 'English bio' })
     expect(person.biography).toBe('English bio')
     expect(mapPerson({ id: 9, name: 'Nom', biography: 'Bio', birthday: '' }).birthday).toBeNull()
+  })
+})
+
+describe('mapListItem / mapList', () => {
+  it('utilise le type de repli quand media_type est absent', () => {
+    expect(mapListItem({ id: 1, title: 'A', release_date: '2020-01-01', vote_average: 7.84 }, 'movie')).toMatchObject({
+      id: 1,
+      type: 'movie',
+      year: 2020,
+      voteAverage: 7.8,
+    })
+  })
+  it('ignore les éléments sans type exploitable et la note nulle', () => {
+    expect(mapListItem({ id: 1, title: 'A' })).toBeNull()
+    expect(mapListItem({ id: 1, media_type: 'person', name: 'X' })).toBeNull()
+    expect(mapListItem({ id: 1, name: 'S', vote_average: 0 }, 'tv')?.voteAverage).toBeNull()
+  })
+  it('dédoublonne par clé composite sans confondre film et série', () => {
+    const list = mapList(
+      [
+        { id: 5, media_type: 'movie', title: 'Film' },
+        { id: 5, media_type: 'tv', name: 'Série' },
+        { id: 5, media_type: 'movie', title: 'Film (doublon)' },
+      ],
+      undefined,
+    )
+    expect(list.map((item) => item.title)).toEqual(['Film', 'Série'])
+  })
+})
+
+describe('mapGenres', () => {
+  it('trie par nom et filtre les entrées invalides', () => {
+    expect(mapGenres({ genres: [{ id: 2, name: 'Western' }, { id: 1, name: 'Action' }, { id: 3, name: ' ' }, { name: 'X' }] })).toEqual([
+      { id: 1, name: 'Action' },
+      { id: 2, name: 'Western' },
+    ])
+  })
+})
+
+describe('buildDiscoverParams', () => {
+  const today = '2026-10-28'
+  it('utilise les champs de date du film ou de la série', () => {
+    const movie = buildDiscoverParams('movie', { genres: [28, 12], yearFrom: 2000, yearTo: 2010, sort: 'popularity' }, today)
+    expect(movie).toMatchObject({
+      with_genres: '28,12',
+      'primary_release_date.gte': '2000-01-01',
+      'primary_release_date.lte': '2010-12-31',
+      sort_by: 'popularity.desc',
+    })
+    const tv = buildDiscoverParams('tv', { genres: [], yearFrom: 2015, sort: 'popularity' }, today)
+    expect(tv['first_air_date.gte']).toBe('2015-01-01')
+    expect(tv.with_genres).toBeUndefined()
+  })
+  it('exige un nombre de votes minimal pour trier par note', () => {
+    const params = buildDiscoverParams('movie', { genres: [], minRating: 7, sort: 'rating' }, today)
+    expect(params).toMatchObject({ sort_by: 'vote_average.desc', 'vote_average.gte': '7', 'vote_count.gte': '200' })
+  })
+  it('limite le tri par date aux titres déjà sortis', () => {
+    expect(buildDiscoverParams('tv', { genres: [], sort: 'date' }, today)).toMatchObject({
+      sort_by: 'first_air_date.desc',
+      'first_air_date.lte': today,
+    })
+    expect(buildDiscoverParams('tv', { genres: [], yearTo: 2020, sort: 'date' }, today)['first_air_date.lte']).toBe('2020-12-31')
+  })
+  it('ajoute la plateforme et la région ensemble', () => {
+    expect(buildDiscoverParams('movie', { genres: [], provider: 8, region: 'FR', sort: 'popularity' }, today)).toMatchObject({
+      with_watch_providers: '8',
+      watch_region: 'FR',
+      with_watch_monetization_types: 'flatrate',
+    })
+    expect(buildDiscoverParams('movie', { genres: [], provider: 8, sort: 'popularity' }, today).with_watch_providers).toBeUndefined()
+  })
+})
+
+describe('parseSources', () => {
+  it('relit une liste valide et ignore les doublons', () => {
+    expect(parseSources('movie:603,tv:1396,movie:603')).toEqual([
+      { id: 603, type: 'movie' },
+      { id: 1396, type: 'tv' },
+    ])
+  })
+  it('refuse le vide, les formats invalides, les ids nuls et plus de 15 sources', () => {
+    expect(parseSources(null)).toBeNull()
+    expect(parseSources('')).toBeNull()
+    expect(parseSources('film:1')).toBeNull()
+    expect(parseSources('movie:0')).toBeNull()
+    expect(parseSources('movie:abc')).toBeNull()
+    expect(parseSources(Array.from({ length: 16 }, (_, i) => `movie:${i + 1}`).join(','))).toBeNull()
+  })
+})
+
+describe('aggregateRecommendations', () => {
+  const item = (id: number, vote: number | null, type: 'movie' | 'tv' = 'movie') => ({
+    id,
+    type,
+    title: `T${id}`,
+    year: 2020,
+    posterPath: null,
+    overview: '',
+    voteAverage: vote,
+  })
+  const sources = [
+    { id: 100, type: 'movie' as const },
+    { id: 200, type: 'tv' as const },
+  ]
+  it('classe par nombre de sources puis par note, sans les sources elles-mêmes', () => {
+    const result = aggregateRecommendations(sources, [
+      [item(1, 6), item(2, 9), item(100, 8)],
+      [item(1, 6), item(3, 7)],
+    ])
+    expect(result.map((r) => [r.id, r.score])).toEqual([
+      [1, 2],
+      [2, 1],
+      [3, 1],
+    ])
+  })
+  it('compte une seule fois un titre répété dans la même liste et distingue film et série', () => {
+    const result = aggregateRecommendations(sources, [[item(1, 5), item(1, 5), item(1, 5, 'tv')]])
+    expect(result.map((r) => [r.type, r.id, r.score])).toEqual([
+      ['movie', 1, 1],
+      ['tv', 1, 1],
+    ])
+  })
+  it('ne retient que la limite demandée', () => {
+    expect(aggregateRecommendations(sources, [[item(1, 5), item(2, 6), item(3, 7)]], 2)).toHaveLength(2)
   })
 })

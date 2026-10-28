@@ -1,4 +1,15 @@
-import type { MediaType, PersonDetails, ProvidersResponse, SearchResponse, SeasonDetails, TitleDetails } from '../../shared/tmdb-types'
+import type {
+  DiscoverSort,
+  ForYouResponse,
+  GenresResponse,
+  ListResponse,
+  MediaType,
+  PersonDetails,
+  ProvidersResponse,
+  SearchResponse,
+  SeasonDetails,
+  TitleDetails,
+} from '../../shared/tmdb-types'
 
 import { ApiError } from './api-error'
 import { supabase } from './supabase'
@@ -37,4 +48,47 @@ export function getProviders(type: MediaType, id: number, region: string, signal
 
 export function getPerson(id: number, signal?: AbortSignal): Promise<PersonDetails> {
   return tmdbRequest<PersonDetails>({ action: 'person', id: String(id) }, signal)
+}
+
+export function getTrending(type: 'all' | MediaType, signal?: AbortSignal): Promise<ListResponse> {
+  return tmdbRequest<ListResponse>({ action: 'trending', type }, signal)
+}
+
+export function getPopular(type: MediaType, signal?: AbortSignal): Promise<ListResponse> {
+  return tmdbRequest<ListResponse>({ action: 'popular', type }, signal)
+}
+
+export function getGenres(type: MediaType, signal?: AbortSignal): Promise<GenresResponse> {
+  return tmdbRequest<GenresResponse>({ action: 'genres', type }, signal)
+}
+
+export interface DiscoverFilters {
+  genres?: number[]
+  yearFrom?: number
+  yearTo?: number
+  minRating?: number
+  provider?: number
+  region?: string
+  sort?: DiscoverSort
+  page?: number
+}
+
+export function discoverTitles(type: MediaType, filters: DiscoverFilters, signal?: AbortSignal): Promise<ListResponse> {
+  const params: Record<string, string> = { action: 'discover', type }
+  if (filters.genres?.length) params.genres = filters.genres.join(',')
+  if (filters.yearFrom !== undefined) params.yearFrom = String(filters.yearFrom)
+  if (filters.yearTo !== undefined) params.yearTo = String(filters.yearTo)
+  if (filters.minRating !== undefined) params.minRating = String(filters.minRating)
+  if (filters.provider !== undefined && filters.region) {
+    params.provider = String(filters.provider)
+    params.region = filters.region
+  }
+  if (filters.sort) params.sort = filters.sort
+  if (filters.page !== undefined) params.page = String(filters.page)
+  return tmdbRequest<ListResponse>(params, signal)
+}
+
+/** `sources` : 15 titres au maximum (les autres sont ignorés par l'appelant). */
+export function getForYou(sources: { id: number; type: MediaType }[], signal?: AbortSignal): Promise<ForYouResponse> {
+  return tmdbRequest<ForYouResponse>({ action: 'forYou', sources: sources.map((s) => `${s.type}:${s.id}`).join(',') }, signal)
 }

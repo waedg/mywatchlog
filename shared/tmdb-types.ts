@@ -115,3 +115,37 @@ export interface PersonDetails {
   profilePath: string | null
   credits: PersonCredit[]
 }
+
+// ---------- Phase 8 : découverte ----------
+
+/** Résultat de liste (tendances, populaires, exploration, recommandations). */
+export interface ListResult extends SearchResult {
+  /** Note TMDB sur 10 (null si absente ou nulle). */
+  voteAverage: number | null
+}
+
+export interface ListResponse {
+  page: number
+  totalPages: number
+  results: ListResult[]
+}
+
+export interface Genre {
+  id: number
+  name: string
+}
+
+export interface GenresResponse {
+  genres: Genre[]
+}
+
+export type DiscoverSort = 'popularity' | 'rating' | 'date'
+
+/** Résultat de « Pour toi » : `score` = nombre de titres sources qui le recommandent. */
+export interface ForYouResult extends ListResult {
+  score: number
+}
+
+export interface ForYouResponse {
+  results: ForYouResult[]
+}

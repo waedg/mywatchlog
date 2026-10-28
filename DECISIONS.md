@@ -45,6 +45,7 @@ Une décision validée n'est modifiée que par une nouvelle entrée qui la rempl
 | D-39 | 2026-10-28 | Phase 7 : VLC comme lecteur principal (option C), Jellyfin en recours seulement ; dossiers nommés avec `[tmdbid-<id>]` sous `Films/` et `Series/` pour un rapprochement automatique ; essai 7.0 révisé (authentification de l'URL pour VLC, lancement Android et PC, débit montant) | Lecture MKV / DTS / sous-titres intégrés sans transcodage ; aucune liaison manuelle à saisir (petite bibliothèque, renommage possible) | |
 | D-40 | 2026-10-28 | Phase 8 « Découverte » : tendances / populaires, exploration par critères, « Pour toi », « Que regarder ce soir ? ». Aucune modification de la fiche | Demande de l'utilisateur ; modifications de fiche reportées (B-055) | |
 | D-41 | 2026-10-28 | Phase 8 : entrée de navigation « Découvrir » (page Recherche inchangée) ; « Que regarder ce soir ? » en section de Découvrir ; sources de « Pour toi » = notes ≥ 8 + favoris hors « Abandonné » (les « Vu » sans note exclus) ; pas de migration 006 | Réponses de l'utilisateur | |
+| D-42 | 2026-10-28 | Phase 8.1 : listes TMDB servies avec `Cache-Control: private, max-age=3600` (genres 24 h), jamais `s-maxage` ; « Pour toi » (`forYou`) en `no-store`, mis en cache côté client | Un cache CDN partagé servirait la réponse sans passer par la liste d'autorisation (is_allowed) | |
 
 ## Modèle d'entrée
 

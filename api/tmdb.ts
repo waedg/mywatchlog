@@ -5,7 +5,11 @@
 
 import type {
   CastMember,
+  DiscoverSort,
   EpisodeInfo,
+  ForYouResult,
+  Genre,
+  ListResult,
   MediaType,
   NextEpisode,
   PersonCredit,
@@ -34,7 +38,7 @@ interface TmdbItem {
   first_air_date?: string | null
   poster_path?: string | null
   overview?: string | null
-  genres?: { name?: string }[]
+  genres?: { id?: number; name?: string }[]
   vote_average?: number | null
   imdb_id?: string | null
   external_ids?: { imdb_id?: string | null }
@@ -285,6 +289,142 @@ export function mapSeason(seasonNumber: number, item: TmdbItem): SeasonDetails {
   return { seasonNumber, episodes }
 }
 
+// ---------- Phase 8 : découverte (fonctions pures) ----------
+
+function roundVote(value?: number | null): number | null {
+  return typeof value === 'number' && value > 0 ? Math.round(value * 10) / 10 : null
+}
+
+/** Mappe un élément de liste ; `fallback` fournit le type quand TMDB n'indique pas `media_type`. */
+export function mapListItem(item: TmdbItem, fallback?: MediaType): ListResult | null {
+  const mediaType = item.media_type ?? fallback
+  if (mediaType !== 'movie' && mediaType !== 'tv') return null
+  const base = mapSearchItem({ ...item, media_type: mediaType })
+  return base ? { ...base, voteAverage: roundVote(item.vote_average) } : null
+}
+
+export function mapList(results: TmdbItem[] | undefined, fallback?: MediaType): ListResult[] {
+  const seen = new Set<string>()
+  const list: ListResult[] = []
+  for (const item of results ?? []) {
+    const mapped = mapListItem(item, fallback)
+    if (!mapped) continue
+    const key = `${mapped.type}-${mapped.id}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    list.push(mapped)
+  }
+  return list
+}
+
+export function mapGenres(data: { genres?: { id?: number; name?: string }[] }): Genre[] {
+  return (data.genres ?? [])
+    .filter((genre) => Number.isInteger(genre.id) && genre.name?.trim())
+    .map((genre) => ({ id: genre.id as number, name: (genre.name as string).trim() }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+}
+
+export interface DiscoverInput {
+  genres: number[]
+  yearFrom?: number
+  yearTo?: number
+  minRating?: number
+  provider?: number
+  region?: string
+  sort: DiscoverSort
+}
+
+const MIN_VOTES_FOR_RATING = 200
+
+/** Construit les paramètres `/discover` (films ou séries). Les genres sont combinés en ET. */
+export function buildDiscoverParams(type: MediaType, input: DiscoverInput, today: string): Record<string, string> {
+  const dateField = type === 'movie' ? 'primary_release_date' : 'first_air_date'
+  const params: Record<string, string> = {
+    language: LANG_PRIMARY,
+    include_adult: 'false',
+    include_video: 'false',
+  }
+  if (input.genres.length > 0) params.with_genres = input.genres.join(',')
+  if (input.yearFrom !== undefined) params[`${dateField}.gte`] = `${input.yearFrom}-01-01`
+  if (input.yearTo !== undefined) params[`${dateField}.lte`] = `${input.yearTo}-12-31`
+  if (input.minRating !== undefined && input.minRating > 0) {
+    params['vote_average.gte'] = String(input.minRating)
+    params['vote_count.gte'] = '100'
+  }
+  if (input.provider !== undefined && input.region) {
+    params.with_watch_providers = String(input.provider)
+    params.watch_region = input.region
+    params.with_watch_monetization_types = 'flatrate'
+  }
+  if (input.sort === 'rating') {
+    params.sort_by = 'vote_average.desc'
+    params['vote_count.gte'] = String(MIN_VOTES_FOR_RATING)
+  } else if (input.sort === 'date') {
+    params.sort_by = `${dateField}.desc`
+    // Évite de lister en tête les titres annoncés dont la date est future.
+    if (params[`${dateField}.lte`] === undefined || (params[`${dateField}.lte`] as string) > today) {
+      params[`${dateField}.lte`] = today
+    }
+  } else {
+    params.sort_by = 'popularity.desc'
+  }
+  return params
+}
+
+export interface SourceRef {
+  id: number
+  type: MediaType
+}
+
+export const FOR_YOU_MAX_SOURCES = 15
+export const FOR_YOU_MAX_RESULTS = 60
+
+/**
+ * Agrège les recommandations de plusieurs titres sources : score = nombre de sources qui recommandent le titre,
+ * puis note TMDB. Les titres sources eux-mêmes sont exclus.
+ */
+export function aggregateRecommendations(
+  sources: SourceRef[],
+  lists: ListResult[][],
+  limit = FOR_YOU_MAX_RESULTS,
+): ForYouResult[] {
+  const sourceKeys = new Set(sources.map((source) => `${source.type}-${source.id}`))
+  const byKey = new Map<string, ForYouResult>()
+  for (const list of lists) {
+    const seenInList = new Set<string>()
+    for (const item of list) {
+      const key = `${item.type}-${item.id}`
+      if (sourceKeys.has(key) || seenInList.has(key)) continue
+      seenInList.add(key)
+      const known = byKey.get(key)
+      if (known) known.score += 1
+      else byKey.set(key, { ...item, score: 1 })
+    }
+  }
+  return [...byKey.values()]
+    .sort((a, b) => b.score - a.score || (b.voteAverage ?? 0) - (a.voteAverage ?? 0) || a.title.localeCompare(b.title, 'fr'))
+    .slice(0, limit)
+}
+
+/** Relit `sources=movie:603,tv:1396` ; renvoie null si le format est invalide. */
+export function parseSources(value: string | null): SourceRef[] | null {
+  if (!value) return null
+  const parts = value.split(',')
+  if (parts.length < 1 || parts.length > FOR_YOU_MAX_SOURCES) return null
+  const seen = new Set<string>()
+  const sources: SourceRef[] = []
+  for (const part of parts) {
+    const match = /^(movie|tv):(\d{1,9})$/.exec(part)
+    if (!match) return null
+    const id = Number(match[2])
+    if (id < 1) return null
+    if (seen.has(part)) continue
+    seen.add(part)
+    sources.push({ id, type: match[1] as MediaType })
+  }
+  return sources
+}
+
 // ---------- Accès TMDB ----------
 
 class TmdbError extends Error {
@@ -309,6 +449,11 @@ async function tmdbGet<T = TmdbItem>(path: string, params: Record<string, string
 }
 
 // ---------- Réponses HTTP ----------
+
+// Listes TMDB publiques : cache navigateur uniquement (« private »), jamais en cache partagé,
+// sinon le CDN servirait la réponse sans passer par la liste d'autorisation.
+const LISTS_CACHE = { 'Cache-Control': 'private, max-age=3600' }
+const GENRES_CACHE = { 'Cache-Control': 'private, max-age=86400' }
 
 function json(body: unknown, status = 200, extra: Record<string, string> = {}): Response {
   return Response.json(body, {
@@ -414,6 +559,109 @@ export default {
         return json(mapProviders(region, data))
       }
 
+      if (action === 'trending' || action === 'popular') {
+        const type = params.get('type')
+        const page = Number(params.get('page') ?? '1')
+        if (action === 'trending' ? !['all', 'movie', 'tv'].includes(type ?? '') : type !== 'movie' && type !== 'tv')
+          return json({ error: 'bad_request', detail: action === 'trending' ? 'type (all, movie ou tv)' : 'type (movie ou tv)' }, 400)
+        if (!Number.isInteger(page) || page < 1 || page > 10) return json({ error: 'bad_request', detail: 'page (1 à 10)' }, 400)
+
+        const path = action === 'trending' ? `/trending/${type}/week` : `/${type}/popular`
+        const data = (await tmdbGet(path, { language: LANG_PRIMARY, page: String(page) })) as TmdbItem & {
+          results?: TmdbItem[]
+          page?: number
+          total_pages?: number
+        }
+        const fallback = type === 'movie' || type === 'tv' ? type : undefined
+        return json(
+          { page: data.page ?? page, totalPages: Math.min(data.total_pages ?? 1, 10), results: mapList(data.results, fallback) },
+          200,
+          LISTS_CACHE,
+        )
+      }
+
+      if (action === 'genres') {
+        const type = params.get('type')
+        if (type !== 'movie' && type !== 'tv') return json({ error: 'bad_request', detail: 'type (movie ou tv)' }, 400)
+        const data = await tmdbGet<{ genres?: { id?: number; name?: string }[] }>(`/genre/${type}/list`, { language: LANG_PRIMARY })
+        return json({ genres: mapGenres(data) }, 200, GENRES_CACHE)
+      }
+
+      if (action === 'discover') {
+        const type = params.get('type')
+        if (type !== 'movie' && type !== 'tv') return json({ error: 'bad_request', detail: 'type (movie ou tv)' }, 400)
+        const page = Number(params.get('page') ?? '1')
+        if (!Number.isInteger(page) || page < 1 || page > 10) return json({ error: 'bad_request', detail: 'page (1 à 10)' }, 400)
+
+        const genreValue = params.get('genres')
+        const genres = genreValue ? genreValue.split(',').map(Number) : []
+        if (genres.length > 5 || genres.some((genre) => !Number.isInteger(genre) || genre < 1 || genre > 99999))
+          return json({ error: 'bad_request', detail: 'genres (5 entiers positifs maximum, séparés par des virgules)' }, 400)
+
+        const optionalInt = (name: string, min: number, max: number): number | undefined | null => {
+          const raw = params.get(name)
+          if (raw === null || raw === '') return undefined
+          const value = Number(raw)
+          return Number.isInteger(value) && value >= min && value <= max ? value : null
+        }
+        const yearFromValue = optionalInt('yearFrom', 1888, 2100)
+        const yearToValue = optionalInt('yearTo', 1888, 2100)
+        const provider = optionalInt('provider', 1, 99999)
+        if (yearFromValue === null || yearToValue === null) return json({ error: 'bad_request', detail: 'yearFrom / yearTo (1888 à 2100)' }, 400)
+        if (yearFromValue !== undefined && yearToValue !== undefined && yearFromValue > yearToValue)
+          return json({ error: 'bad_request', detail: 'yearFrom doit être inférieur ou égal à yearTo' }, 400)
+        if (provider === null) return json({ error: 'bad_request', detail: 'provider (entier positif)' }, 400)
+
+        const minRatingRaw = params.get('minRating')
+        const minRating = minRatingRaw === null || minRatingRaw === '' ? undefined : Number(minRatingRaw)
+        if (minRating !== undefined && !(minRating >= 0 && minRating <= 10)) return json({ error: 'bad_request', detail: 'minRating (0 à 10)' }, 400)
+
+        const region = params.get('region') ?? undefined
+        if (provider !== undefined && !(region && /^[A-Z]{2}$/.test(region)))
+          return json({ error: 'bad_request', detail: 'region (code pays à 2 lettres majuscules) requis avec provider' }, 400)
+
+        const sortRaw = params.get('sort') ?? 'popularity'
+        if (sortRaw !== 'popularity' && sortRaw !== 'rating' && sortRaw !== 'date')
+          return json({ error: 'bad_request', detail: 'sort (popularity, rating ou date)' }, 400)
+
+        const query = buildDiscoverParams(
+          type,
+          { genres, yearFrom: yearFromValue, yearTo: yearToValue, minRating, provider, region, sort: sortRaw },
+          new Date().toISOString().slice(0, 10),
+        )
+        const data = (await tmdbGet(`/discover/${type}`, { ...query, page: String(page) })) as TmdbItem & {
+          results?: TmdbItem[]
+          page?: number
+          total_pages?: number
+        }
+        return json(
+          { page: data.page ?? page, totalPages: Math.min(data.total_pages ?? 1, 10), results: mapList(data.results, type) },
+          200,
+          LISTS_CACHE,
+        )
+      }
+
+      if (action === 'forYou') {
+        const sources = parseSources(params.get('sources'))
+        if (!sources) return json({ error: 'bad_request', detail: `sources (1 à ${FOR_YOU_MAX_SOURCES} éléments « movie:id » ou « tv:id »)` }, 400)
+
+        const settled = await Promise.allSettled(
+          sources.map(async (source) => {
+            const data = (await tmdbGet(`/${source.type}/${source.id}/recommendations`, { language: LANG_PRIMARY, page: '1' })) as TmdbItem & {
+              results?: TmdbItem[]
+            }
+            return mapList(data.results, source.type)
+          }),
+        )
+        const lists = settled.flatMap((entry) => (entry.status === 'fulfilled' ? [entry.value] : []))
+        // Aucune source n'a répondu : l'erreur est probablement côté TMDB (ou quota), pas un résultat vide.
+        if (lists.length === 0) {
+          const rejected = settled.find((entry): entry is PromiseRejectedResult => entry.status === 'rejected')
+          throw rejected?.reason ?? new Error('forYou')
+        }
+        return json({ results: aggregateRecommendations(sources, lists) })
+      }
+
       if (action === 'person') {
         const id = Number(params.get('id'))
         if (!Number.isInteger(id) || id < 1) return json({ error: 'bad_request', detail: 'id (entier positif)' }, 400)
@@ -424,7 +672,7 @@ export default {
         return json(mapPerson(primary, fallback))
       }
 
-      return json({ error: 'bad_request', detail: 'action (search, details, season, providers ou person)' }, 400)
+      return json({ error: 'bad_request', detail: 'action (search, details, season, providers, person, trending, popular, genres, discover ou forYou)' }, 400)
     } catch (error) {
       if (error instanceof TmdbError) {
         if (error.status === 404) return json({ error: 'not_found' }, 404)
