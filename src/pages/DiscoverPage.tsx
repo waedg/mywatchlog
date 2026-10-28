@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
+import ForYouSection from '@/features/discover/ForYouSection'
 import TmdbSection from '@/features/discover/TmdbSection'
 import TonightPick from '@/features/discover/TonightPick'
 import { tmdbSections } from '@/features/discover/sections'
@@ -55,6 +56,8 @@ export default function DiscoverPage() {
       {library.isSuccess && (
         <TonightPick items={library.data} type={filter} copyOnly={copyOnly} onToggleCopy={() => update('copy', copyOnly ? null : '1')} />
       )}
+
+      {library.isSuccess && <ForYouSection items={library.data} type={filter} owned={owned} />}
 
       {tmdbSections(filter).map((section) => (
         <TmdbSection key={section.id} section={section} owned={owned} />

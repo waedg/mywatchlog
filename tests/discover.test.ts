@@ -94,3 +94,58 @@ describe('rerollSeed', () => {
     expect(pickAt([list[0]], rerollSeed([list[0] as LibraryItem], list[0] as LibraryItem, () => 0.5))?.id).toBe(1)
   })
 })
+
+import type { ForYouResult } from '../shared/tmdb-types'
+import { FOR_YOU_MAX_SOURCES, filterForYou, forYouCacheKey, pickForYouSources } from '../src/features/discover/forYou'
+
+describe('pickForYouSources', () => {
+  it('garde les notes >= 8 et les favoris, hors abandonnés ; les « Vu » sans note ne comptent pas', () => {
+    const items = [
+      make({ id: 1, title: 'Note 8', rating: 8, status: 'watched' }),
+      make({ id: 2, title: 'Note 7', rating: 7, status: 'watched' }),
+      make({ id: 3, title: 'Favori', isFavorite: true }),
+      make({ id: 4, title: 'Vu sans note', status: 'watched' }),
+      make({ id: 5, title: 'Abandonné noté', rating: 10, status: 'dropped' }),
+      make({ id: 6, title: 'Abandonné favori', isFavorite: true, status: 'dropped' }),
+    ]
+    expect(pickForYouSources(items).map((i) => i.id)).toEqual([1, 3])
+  })
+  it('classe par note puis favori puis titre, et plafonne à 15', () => {
+    const items = Array.from({ length: 20 }, (_, index) => make({ id: index + 1, title: `T${String(index).padStart(2, '0')}`, rating: 8 }))
+    items.push(make({ id: 99, title: 'Zèbre', rating: 10 }), make({ id: 98, title: 'Aigle', rating: 8, isFavorite: true }))
+    const picked = pickForYouSources(items)
+    expect(picked).toHaveLength(FOR_YOU_MAX_SOURCES)
+    expect(picked[0]?.id).toBe(99)
+    expect(picked[1]?.id).toBe(98)
+  })
+})
+
+describe('forYouCacheKey', () => {
+  it('ne dépend pas de l\'ordre et distingue film et série', () => {
+    const a = forYouCacheKey([{ id: 2, type: 'movie' }, { id: 1, type: 'tv' }])
+    const b = forYouCacheKey([{ id: 1, type: 'tv' }, { id: 2, type: 'movie' }])
+    expect(a).toBe(b)
+    expect(forYouCacheKey([{ id: 1, type: 'movie' }])).not.toBe(forYouCacheKey([{ id: 1, type: 'tv' }]))
+  })
+})
+
+describe('filterForYou', () => {
+  const result = (id: number, type: 'movie' | 'tv', score = 1): ForYouResult => ({
+    id,
+    type,
+    title: `T${id}`,
+    year: 2020,
+    posterPath: null,
+    overview: '',
+    voteAverage: null,
+    score,
+  })
+  const results = [result(1, 'movie'), result(2, 'tv'), result(3, 'movie'), result(4, 'tv')]
+  it('retire les titres déjà dans la liste, sans confondre film et série', () => {
+    expect(filterForYou(results, new Set(['movie-1', 'tv-3']), 'all').map((r) => `${r.type}-${r.id}`)).toEqual(['tv-2', 'movie-3', 'tv-4'])
+  })
+  it('filtre par type puis limite', () => {
+    expect(filterForYou(results, new Set(), 'tv').map((r) => r.id)).toEqual([2, 4])
+    expect(filterForYou(results, new Set(), 'all', 2)).toHaveLength(2)
+  })
+})
