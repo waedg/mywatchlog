@@ -44,6 +44,7 @@ Une décision validée n'est modifiée que par une nouvelle entrée qui la rempl
 | D-38 | 2026-10-28 | Phase 7 (lecture depuis le NAS) cadrée sans développement : contexte Tailscale + FileBrowser Quantum (Docker) + fichiers MKV ; HTTPS via Tailscale Serve (jamais Funnel) ; jeton Quantum en lecture seule stocké localement sur l'appareil (jamais dans le dépôt ni dans Supabase) ; option de lecture décidée après un essai de compatibilité sur 3 fichiers (7.0), non avant | Les capacités de lecture MKV / HEVC / DTS ne sont pas établies : décider sur des faits | |
 | D-39 | 2026-10-28 | Phase 7 : VLC comme lecteur principal (option C), Jellyfin en recours seulement ; dossiers nommés avec `[tmdbid-<id>]` sous `Films/` et `Series/` pour un rapprochement automatique ; essai 7.0 révisé (authentification de l'URL pour VLC, lancement Android et PC, débit montant) | Lecture MKV / DTS / sous-titres intégrés sans transcodage ; aucune liaison manuelle à saisir (petite bibliothèque, renommage possible) | |
 | D-40 | 2026-10-28 | Phase 8 « Découverte » : tendances / populaires, exploration par critères, « Pour toi », « Que regarder ce soir ? ». Aucune modification de la fiche | Demande de l'utilisateur ; modifications de fiche reportées (B-055) | |
+| D-41 | 2026-10-28 | Phase 8 : entrée de navigation « Découvrir » (page Recherche inchangée) ; « Que regarder ce soir ? » en section de Découvrir ; sources de « Pour toi » = notes ≥ 8 + favoris hors « Abandonné » (les « Vu » sans note exclus) ; pas de migration 006 | Réponses de l'utilisateur | |
 
 ## Modèle d'entrée
 
