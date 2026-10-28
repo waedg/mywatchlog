@@ -15,6 +15,7 @@ Statuts : `Ouvert`, `En cours`, `Résolu`, `Abandonné`.
 | B-005 | DEC | Stratégie de tests (unitaires, e2e) et niveau de couverture attendu | 1 | P3 | Résolu (D-20) |
 | B-006 | DEC | Bibliothèque de composants UI : Tailwind seul écarté (D-21), choisir une bibliothèque moderne | 1 | P1 | Résolu (D-22) |
 | B-026 | DEC | Bloquer la création de compte non autorisé (hook « Before User Created » Supabase) | 2 | P3 | Ouvert |
+| B-027 | VERIF | Conseil Supabase « is_allowed() exécutable par authenticated » : voulu (utilisé par les policies RLS, ne renvoie que l'état de l'appelant). Réévaluer un déplacement vers un schéma privé | 2 | P3 | Accepté |
 
 ## Points à vérifier
 
