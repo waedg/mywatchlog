@@ -2,6 +2,8 @@
 
 Statut : **cadrage uniquement, aucun développement** (décision du 2026-10-28). Document à mettre à jour après l'essai de compatibilité (7.0).
 
+**Décisions validées (D-39, 2026-10-28)** : lecteur principal = VLC (option C), Jellyfin accepté en recours seulement ; nommage des dossiers avec `[tmdbid-<id>]` pour le rapprochement automatique ; essai 7.0 révisé (section 12).
+
 ## 1. Objectif
 
 Depuis la fiche d'un film ou d'une série de MyWatchlog, lancer la lecture du fichier vidéo stocké sur le NAS personnel, sans quitter l'application, depuis le téléphone Android (PWA) ou un navigateur.
@@ -123,7 +125,44 @@ Critères de décision :
 7. Jellyfin sur le NAS est-il acceptable si l'essai 7.0 le justifie ?
 8. Version de FileBrowser Quantum et état de ses réglages de lecture (lecteur vidéo, `ffmpeg`).
 
-## 11. Sources
+## 11. Réponses de l'utilisateur (2026-10-28)
+
+| Question | Réponse |
+|---|---|
+| Caractéristiques des fichiers | Pas encore relevées (`ffprobe` à faire en 7.0) |
+| Appareils | Téléphone Android et PC (Tailscale et VLC installés sur le PC) |
+| Distance | Chez soi et à distance |
+| Autre VPN sur le téléphone | Non |
+| Rangement | Adaptable, petite bibliothèque (renommage manuel possible) |
+| Sous-titres | Intégrés et fichiers `.srt` |
+| Jellyfin | Accepté si l'essai le justifie |
+| Lecteur préféré | VLC |
+
+## 12. Décisions et essai 7.0 révisé (D-39)
+
+**Nommage** (rapprochement automatique, remplace la liaison manuelle du bloc 7.2). Préfixes `Films/` et `Series/` obligatoires : un identifiant TMDB film et un identifiant série peuvent coïncider.
+
+```text
+Films/Inception (2010) [tmdbid-27205]/Inception (2010) [tmdbid-27205].mkv
+Films/Inception (2010) [tmdbid-27205]/Inception (2010) [tmdbid-27205].fr.srt
+Series/Breaking Bad (2008) [tmdbid-1396]/Season 01/Breaking Bad - S01E01.mkv
+Series/Breaking Bad (2008) [tmdbid-1396]/Season 01/Breaking Bad - S01E01.fr.srt
+```
+
+**Points à vérifier en 7.0**
+
+1. Authentification d'une URL ouverte dans VLC (pas d'en-tête `Authorization`) : lien de partage Quantum avec expiration, ou jeton en paramètre d'URL. Sinon : Jellyfin ou relais.
+2. Lancement de VLC : Android, lien `intent://` avec le paquet `org.videolan.vlc` (à confirmer) ; PC, fichier `.m3u` ou « Média → Ouvrir un flux réseau ».
+
+**Étapes**
+
+1. `ffprobe` sur 3 fichiers (H.264, HEVC, audio DTS).
+2. `tailscale serve` vers Quantum.
+3. Lien de partage Quantum ouvert dans VLC Android sur 4G : lecture, son, sous-titres, délai de démarrage.
+4. Même test sur PC (flux réseau).
+5. Débit montant du NAS.
+
+## 13. Sources
 
 - FileBrowser Quantum : [présentation (ComputingForGeeks)](https://computingforgeeks.com/install-filebrowser-quantum/), [LinuxLinks](https://www.linuxlinks.com/filebrowser-quantum-feature-rich-web-file-manager/), [dépôt dérivé](https://github.com/kenrmayfield/filebrowserquantum) ; documentation officielle à consulter : filebrowserquantum.com
 - Tailscale : [`tailscale serve`](https://tailscale.com/docs/reference/tailscale-cli/serve)

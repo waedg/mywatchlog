@@ -73,3 +73,4 @@ Aucun pour l'instant.
 | B-051 | TODO | Phase 7.0 : essai de compatibilité sur 3 fichiers (H.264, HEVC, audio DTS) via Tailscale Serve : lecteur de Quantum, URL directe, VLC / MX Player ; relever codecs, débit montant, VPN du téléphone (voir docs/phase-7-nas.md) | 7 | P2 | Ouvert |
 | B-052 | TODO | Créer dans Quantum un utilisateur en lecture seule limité au dossier des vidéos, et en tirer le jeton de l'application | 7 | P2 | Ouvert |
 | B-053 | TODO | Vérifier dans la documentation officielle de Quantum : lecteur vidéo, transcodage, sous-titres, requêtes Range, CORS | 7 | P2 | Ouvert |
+| B-054 | TODO | Renommer les fichiers du NAS selon la convention `[tmdbid-<id>]` sous `Films/` et `Series/` (docs/phase-7-nas.md §12), sous-titres `.srt` au même nom | 7 | P2 | Ouvert |
