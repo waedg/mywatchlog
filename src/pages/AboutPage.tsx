@@ -1,5 +1,6 @@
 import { Download, ExternalLink, Mail } from 'lucide-react'
 
+import tmdbLogo from '@/assets/tmdb-logo.svg'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/auth-context'
 import { isStandalone, useInstall } from '@/lib/install-prompt'
@@ -84,6 +85,10 @@ export default function AboutPage() {
       </Section>
 
       <Section title="Données et crédits">
+        <a href="https://www.themoviedb.org" target="_blank" rel="noreferrer" className="inline-block">
+          {/* Logo officiel TMDB : couleurs et proportions inchangées, plus discret que le logo de l'application. */}
+          <img src={tmdbLogo} alt="TMDB" className="h-5 w-auto" />
+        </a>
         <p className="text-sm leading-relaxed">
           This product uses the TMDB API but is not endorsed or certified by TMDB.
         </p>

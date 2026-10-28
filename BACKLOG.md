@@ -41,7 +41,7 @@ Statuts : `Ouvert`, `En cours`, `Résolu`, `Abandonné`.
 | B-020 | TODO | Créer le dépôt GitHub public `mywatchlog` (action utilisateur) | 0 | P1 | Résolu |
 | B-021 | TODO | Rattacher le dépôt à la session et commiter les fichiers de cadrage | 0 | P1 | Résolu |
 | B-022 | TODO | Créer le projet Vercel relié au dépôt | 0 | P1 | Résolu |
-| B-023 | TODO | Ajouter une page « À propos » avec mention et logo TMDB | 4 | P2 | Résolu (texte), logo en attente (B-041) |
+| B-023 | TODO | Ajouter une page « À propos » avec mention et logo TMDB | 4 | P2 | Résolu |
 | B-024 | TODO | Renseigner l'URL du site (https://mywatchlog-delta.vercel.app) et l'URI de redirection dans Supabase Auth (URL Configuration) | 1 | P1 | Résolu (déclaré par l'utilisateur) |
 | B-025 | TODO | Accorder au connecteur Vercel l'accès à l'espace de l'utilisateur (403 sur le scope wago1) | 1 | P3 | Résolu |
 
@@ -60,7 +60,7 @@ Aucun pour l'instant.
 | B-038 | TODO | Fuseau horaire des dates de diffusion (B-004) : comparaison avec la date locale du navigateur | 3 | P3 | Ouvert |
 | B-039 | TODO | Restauration de la position de défilement au retour (non incluse : les listes se chargent de façon asynchrone) | 4 | P3 | Ouvert |
 | B-040 | TODO | « À jour » exact pour une série encore diffusée : le total inclut les épisodes annoncés non diffusés, donc 44/44 n'apparaît que si tous les épisodes listés sont vus | 4 | P3 | Ouvert |
-| B-041 | TODO | Ajouter le logo officiel TMDB sur la page À propos (fichier non récupérable depuis l'environnement : à fournir, depuis themoviedb.org/about/logos-attribution) ; il doit rester moins visible que le logo de l'application | 4 | P2 | Ouvert |
+| B-041 | TODO | Ajouter le logo officiel TMDB sur la page À propos (fichier non récupérable depuis l'environnement : à fournir, depuis themoviedb.org/about/logos-attribution) ; il doit rester moins visible que le logo de l'application | 4 | P2 | Résolu |
 | B-042 | TODO | Écritures hors connexion (cocher des épisodes puis synchroniser plus tard) : non prévu, à étudier si le besoin apparaît | 5 | P3 | Ouvert |
 | B-043 | TODO | Icône personnalisée à remplacer par une image fournie par l'utilisateur (décision 2 : « pour le moment ») | 4 | P3 | Ouvert |
 | B-044 | TODO | Sorties : calcul côté serveur par tâche planifiée (clé service_role dans Vercel) si le chargement devient long avec une grosse liste ; à grouper avec les notifications (phase 6) | 6 | P3 | Ouvert |
