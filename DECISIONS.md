@@ -18,6 +18,8 @@ Une décision validée n'est modifiée que par une nouvelle entrée qui la rempl
 | D-12 | 2026-10-28 | Nom MyWatchlog, dépôt GitHub public `mywatchlog` | Permet à Claude de commiter et de suivre les modifications | |
 | D-13 | 2026-10-28 | Claude pilote Vercel directement (création du projet, variables d'environnement) | Accord de l'utilisateur | |
 | D-14 | 2026-10-28 | Validation de l'utilisateur avant chaque phase, aucun code sans accord | Consigne du projet | |
+| D-15 | 2026-10-28 | Versions figées par `package-lock.json` au 2026-10-28 : Node 22.23.4, Vite 8.3.5, React 19.3.1, TypeScript 7.0.2, Tailwind 4.3.3, supabase-js 2.118.0, TanStack Query 5.105.0, React Router 7.18.5, vite-plugin-pwa 2.0.0 | Reproductibilité du squelette de la phase 0 | |
+| D-16 | 2026-10-28 | Projet Supabase `mywatchlog` en région eu-west-1 (Irlande, UE), Postgres 17 | Région UE respectée | |
 
 ## Modèle d'entrée
 

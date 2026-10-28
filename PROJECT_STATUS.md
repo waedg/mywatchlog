@@ -29,7 +29,7 @@ Cadrage complet : document « MyWatchlog : Cadrage du projet » (artifact Claude
 
 | Phase | Contenu | Statut |
 |---|---|---|
-| 0 | Comptes, dépôt, squelette Vite + React + TS, déploiement Vercel | En attente (création du dépôt GitHub) |
+| 0 | Comptes, dépôt, squelette Vite + React + TS, déploiement Vercel | En cours (squelette poussé, projet Vercel à créer) |
 | 1 | Connexion Google, recherche TMDB, ajout à la liste | À faire |
 | 2 | Statuts, notes, favoris, films et séries séparés | À faire |
 | 3 | Suivi épisode par épisode, prochain à voir | À faire |
@@ -41,18 +41,18 @@ Cadrage complet : document « MyWatchlog : Cadrage du projet » (artifact Claude
 
 Côté utilisateur :
 
-- [ ] Dépôt GitHub public vide `mywatchlog` (sans README ni licence)
-- [ ] Compte TMDB + clé API + Read Access Token
-- [ ] Projet Supabase (région UE)
-- [ ] Identifiants OAuth Google (écran de consentement, application Web)
-- [ ] Compte Vercel lié à GitHub
+- [x] Dépôt GitHub public `mywatchlog`
+- [x] Compte TMDB + clé API + Read Access Token (non vérifiés par Claude)
+- [x] Projet Supabase (région UE, eu-west-1), vérifié actif
+- [x] Identifiants OAuth Google créés (déclaré par l'utilisateur, fournisseur à vérifier en phase 1)
+- [x] Compte Vercel lié à GitHub (connecteur vérifié)
 
-Côté Claude (après validation) :
+Côté Claude :
 
-- [ ] Rattacher le dépôt et commiter les fichiers de cadrage
+- [x] Rattacher le dépôt et commiter les fichiers de cadrage
+- [x] Initialiser le squelette Vite + React + TypeScript (build et lint OK)
 - [ ] Créer le projet Vercel relié au dépôt
-- [ ] Initialiser le squelette Vite + React + TypeScript
-- [ ] Configurer les variables d'environnement Vercel
+- [ ] Configurer les variables d'environnement Vercel (`VITE_*` par Claude, `TMDB_READ_TOKEN` par l'utilisateur)
 
 ## Variables d'environnement prévues
 

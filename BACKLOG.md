@@ -29,8 +29,8 @@ Statuts : `Ouvert`, `En cours`, `Résolu`, `Abandonné`.
 
 | ID | Type | Sujet | Phase cible | Prio | Statut |
 |---|---|---|---|---|---|
-| B-020 | TODO | Créer le dépôt GitHub public `mywatchlog` (action utilisateur) | 0 | P1 | Ouvert |
-| B-021 | TODO | Rattacher le dépôt à la session et commiter les fichiers de cadrage | 0 | P1 | Ouvert |
+| B-020 | TODO | Créer le dépôt GitHub public `mywatchlog` (action utilisateur) | 0 | P1 | Résolu |
+| B-021 | TODO | Rattacher le dépôt à la session et commiter les fichiers de cadrage | 0 | P1 | Résolu |
 | B-022 | TODO | Créer le projet Vercel relié au dépôt | 0 | P1 | Ouvert |
 | B-023 | TODO | Ajouter une page « À propos » avec mention et logo TMDB | 4 | P2 | Ouvert |
 
