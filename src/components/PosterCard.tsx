@@ -25,7 +25,7 @@ export default function PosterCard({ title, year, type, posterPath, action, to, 
 
   return (
     <article className="group relative flex flex-col gap-2">
-      <Wrapper to={to} className="flex flex-col gap-2">
+      <Wrapper to={to} className="flex flex-1 flex-col gap-2">
       <div className="relative aspect-[2/3] overflow-hidden rounded-xl border bg-card shadow-sm transition-transform duration-200 group-hover:-translate-y-1">
         {src ? (
           <img src={src} alt={`Affiche de ${title}`} loading="lazy" className="size-full object-cover" />
