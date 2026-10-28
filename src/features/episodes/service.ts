@@ -74,15 +74,25 @@ export async function reconcile(qc: QueryClient, userId: string, tvId: number): 
   const { tv } = await loadTv(qc, tvId)
   const counts = await syncTvMeta(tvId, toSeasonCounts(tv.seasons), tv.ended)
   // Relevé du premier numéro d'épisode de chaque saison, en arrière-plan (une seule fois par série).
+  // Si des numéros viennent d'être relevés, les compteurs changent : le statut automatique est recalculé.
   void learnSeasonFirsts(qc, tvId, counts)
-    .then((learned) => (learned ? qc.invalidateQueries({ queryKey: ['library'] }) : undefined))
+    .then(async (learned) => {
+      if (!learned) return
+      await applyAutoStatus(userId, tvId, counts, tv.ended)
+      await qc.invalidateQueries({ queryKey: ['library'] })
+    })
     .catch(() => undefined)
 
+  await applyAutoStatus(userId, tvId, counts, tv.ended)
+}
+
+/** Applique le statut automatique (D-33) si la série est dans la liste. */
+export async function applyAutoStatus(userId: string, tvId: number, counts: SeasonCount[], ended: boolean): Promise<void> {
   const current = await fetchStatus(tvId, userId)
   if (!current || !isStatus(current)) return
 
   const watched = await fetchWatchedFor(tvId)
-  const next = autoStatus(current, watchedCount(watched, counts), totalEpisodes(counts), tv.ended)
+  const next = autoStatus(current, watchedCount(watched, counts), totalEpisodes(counts), ended)
   if (next) await updateUserTitle({ id: tvId, type: 'tv' }, userId, statusPatch(next))
 }
 

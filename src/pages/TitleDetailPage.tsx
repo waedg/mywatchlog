@@ -13,7 +13,8 @@ import CopyToggle from '@/features/library/CopyToggle'
 import EpisodeTracker from '@/features/episodes/EpisodeTracker'
 import { sameSeasonCounts, toSeasonCounts } from '@/features/episodes/progress'
 import { syncTvMeta } from '@/features/episodes/api'
-import { learnSeasonFirsts } from '@/features/episodes/service'
+import { applyAutoStatus, learnSeasonFirsts } from '@/features/episodes/service'
+import { useAuth } from '@/features/auth/auth-context'
 import { useWatched } from '@/features/episodes/useEpisodes'
 import AddToLibraryButton from '@/features/library/AddToLibraryButton'
 import {
@@ -47,6 +48,8 @@ function TitleDetail({ type, id }: { type: MediaType; id: number }) {
   const library = useLibrary()
   const watched = useWatched()
   const queryClient = useQueryClient()
+  const { session } = useAuth()
+  const userId = session?.user.id
 
   const entry = library.data?.find((item) => libraryKey(item.type, item.id) === libraryKey(type, id))
   const tv = details.data?.tv ?? null
@@ -66,12 +69,17 @@ function TitleDetail({ type, id }: { type: MediaType; id: number }) {
     if (learning.current) return
     learning.current = true
     void learnSeasonFirsts(queryClient, id, entry.seasonCounts)
-      .then((learned) => (learned ? queryClient.invalidateQueries({ queryKey: ['library'] }) : undefined))
+      .then(async (learned) => {
+        if (!learned) return
+        // Les compteurs ont pu changer : le statut automatique est recalculé une seule fois, au moment du relevé.
+        if (userId) await applyAutoStatus(userId, id, counts, tv.ended)
+        await queryClient.invalidateQueries({ queryKey: ['library'] })
+      })
       .catch(() => undefined)
       .finally(() => {
         learning.current = false
       })
-  }, [entry, tv, id, queryClient])
+  }, [entry, tv, id, queryClient, userId])
 
   if (details.isPending && details.fetchStatus === 'paused') {
     return (
