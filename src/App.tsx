@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import AboutPage from '@/pages/AboutPage'
 import AppLayout from '@/components/layout/AppLayout'
+import ScrollToTop from '@/components/ScrollToTop'
 import DiscoverPage from '@/pages/DiscoverPage'
 import ExplorePage from '@/pages/ExplorePage'
 import RequireAuth from '@/features/auth/RequireAuth'
@@ -15,6 +16,7 @@ import UpcomingPage from '@/pages/UpcomingPage'
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route element={<RequireAuth />}>

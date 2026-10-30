@@ -96,3 +96,20 @@ describe('parseTypeFilter', () => {
     expect(parseTypeFilter(null)).toBe('all')
   })
 })
+
+import { parseCollapsed, toggleCollapsed } from '../src/features/library/collapse'
+
+describe('groupes repliés', () => {
+  it('relit une liste valide et ignore le reste', () => {
+    expect(parseCollapsed('["watched","dropped","watched","inconnu",3]')).toEqual(['watched', 'dropped'])
+    expect(parseCollapsed('pas du json')).toEqual([])
+    expect(parseCollapsed('{"a":1}')).toEqual([])
+    expect(parseCollapsed(null)).toEqual([])
+  })
+  it('replie puis déplie un groupe sans modifier la liste d\'origine', () => {
+    const start: ('watched' | 'to_watch')[] = ['watched']
+    expect(toggleCollapsed(start, 'to_watch')).toEqual(['watched', 'to_watch'])
+    expect(toggleCollapsed(start, 'watched')).toEqual([])
+    expect(start).toEqual(['watched'])
+  })
+})

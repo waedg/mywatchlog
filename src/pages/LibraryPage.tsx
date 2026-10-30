@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
-import { Heart, Library, WifiOff } from 'lucide-react'
+import { ChevronDown, ChevronRight, Heart, Library, WifiOff } from 'lucide-react'
 
 import EmptyState from '@/components/layout/EmptyState'
 import PosterCard from '@/components/PosterCard'
@@ -9,6 +9,7 @@ import { groupByStatus, libraryKey, parseTypeFilter, STATUS_LABELS, type TypeFil
 import TvProgress from '@/features/episodes/TvProgress'
 import { useWatched } from '@/features/episodes/useEpisodes'
 import QuickWatchedButton, { WatchedMark } from '@/features/library/QuickWatchedButton'
+import { useCollapsedGroups } from '@/features/library/useCollapsed'
 import { useLibrary } from '@/features/library/useLibrary'
 import { cn } from '@/lib/utils'
 
@@ -37,6 +38,7 @@ export default function LibraryPage() {
     )
   const library = useLibrary()
   const watched = useWatched()
+  const [collapsed, toggleGroup] = useCollapsedGroups()
 
   const items = library.data ?? []
   const groups = groupByStatus(items, filter, favoritesOnly)
@@ -111,30 +113,46 @@ export default function LibraryPage() {
       )}
 
       {library.isSuccess &&
-        groups.map((group) => (
-          <div key={group.status} className="space-y-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
-              {STATUS_LABELS[group.status]}{' '}
-              <span className="text-muted-foreground">{group.items.length}</span>
-            </h2>
-            <div className={GRID}>
-              {group.items.map((item) => (
-                <PosterCard
-                  key={libraryKey(item.type, item.id)}
-                  title={item.title}
-                  year={item.year}
-                  type={item.type}
-                  posterPath={item.posterPath}
-                  to={`/title/${item.type}/${item.id}`}
-                  overlay={
-                    item.status === 'watched' ? <WatchedMark id={item.id} type={item.type} /> : <QuickWatchedButton id={item.id} type={item.type} />
-                  }
-                  action={<TvProgress item={item} watched={watched.data?.get(item.id)} />}
-                />
-              ))}
+        groups.map((group) => {
+          const isCollapsed = collapsed.includes(group.status)
+          const Chevron = isCollapsed ? ChevronRight : ChevronDown
+          return (
+            <div key={group.status} className="space-y-4">
+              <h2>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-lg py-1 text-left text-sm font-semibold uppercase tracking-wide text-primary outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  aria-expanded={!isCollapsed}
+                  aria-label={`${STATUS_LABELS[group.status]}, ${group.items.length} titre${group.items.length > 1 ? 's' : ''}, ${isCollapsed ? 'déplier' : 'replier'}`}
+                  onClick={() => toggleGroup(group.status)}
+                >
+                  <Chevron className="size-4 shrink-0" />
+                  <span>
+                    {STATUS_LABELS[group.status]} <span className="text-muted-foreground">{group.items.length}</span>
+                  </span>
+                </button>
+              </h2>
+              {!isCollapsed && (
+                <div className={GRID}>
+                  {group.items.map((item) => (
+                    <PosterCard
+                      key={libraryKey(item.type, item.id)}
+                      title={item.title}
+                      year={item.year}
+                      type={item.type}
+                      posterPath={item.posterPath}
+                      to={`/title/${item.type}/${item.id}`}
+                      overlay={
+                        item.status === 'watched' ? <WatchedMark id={item.id} type={item.type} /> : <QuickWatchedButton id={item.id} type={item.type} />
+                      }
+                      action={<TvProgress item={item} watched={watched.data?.get(item.id)} />}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          )
+        })}
     </section>
   )
 }
