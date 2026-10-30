@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { libraryKey, parseTypeFilter, type TypeFilter } from '@/features/library/group'
 import { listItemsOf } from '@/features/lists/derive'
+import CollectionSuggestions from '@/features/lists/CollectionSuggestions'
 import ListHeader from '@/features/lists/ListHeader'
 import RemoveFromListButton from '@/features/lists/RemoveFromListButton'
 import { useLists } from '@/features/lists/useLists'
@@ -132,6 +133,8 @@ export default function ListDetailPage() {
               ))}
             </div>
           )}
+
+          <CollectionSuggestions items={all} type={filter} online={online} />
         </>
       )}
     </section>
