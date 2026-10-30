@@ -17,6 +17,18 @@ export function useLists() {
 
 type Ref = { id: number; type: MediaType }
 
+/** Retrait d'un titre d'une collection (hook léger : une instance par titre affiché). */
+export function useTakeFromList() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ listId, ref }: { listId: string; ref: Ref }) => {
+      assertOnline()
+      await removeFromList(listId, ref)
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: LISTS_KEY }),
+  })
+}
+
 /** Mutations des listes : refusées hors connexion, règles de nom et de limite contrôlées avant l'appel réseau. */
 export function useListActions() {
   const queryClient = useQueryClient()
@@ -53,7 +65,10 @@ export function useListActions() {
       assertOnline()
       await deleteList(id)
     },
-    onSuccess: refresh,
+    // Sans attendre le rechargement : l'écran de détail peut ainsi rediriger avant que la collection disparaisse de la liste.
+    onSuccess: () => {
+      void refresh()
+    },
   })
 
   const add = useMutation({
@@ -66,13 +81,7 @@ export function useListActions() {
     onSuccess: refresh,
   })
 
-  const take = useMutation({
-    mutationFn: async ({ listId, ref }: { listId: string; ref: Ref }) => {
-      assertOnline()
-      await removeFromList(listId, ref)
-    },
-    onSuccess: refresh,
-  })
+  const take = useTakeFromList()
 
   return { create, rename, remove, add, take }
 }

@@ -7,6 +7,7 @@ import DiscoverPage from '@/pages/DiscoverPage'
 import ExplorePage from '@/pages/ExplorePage'
 import RequireAuth from '@/features/auth/RequireAuth'
 import LibraryPage from '@/pages/LibraryPage'
+import ListDetailPage from '@/pages/ListDetailPage'
 import ListsPage from '@/pages/ListsPage'
 import LoginPage from '@/pages/LoginPage'
 import PersonPage from '@/pages/PersonPage'
@@ -27,6 +28,7 @@ function App() {
             <Route path="/discover/explore" element={<ExplorePage />} />
             <Route path="/library" element={<LibraryPage />} />
             <Route path="/library/lists" element={<ListsPage />} />
+            <Route path="/library/lists/:id" element={<ListDetailPage />} />
             <Route path="/upcoming" element={<UpcomingPage />} />
             <Route path="/person/:id" element={<PersonPage />} />
             <Route path="/about" element={<AboutPage />} />

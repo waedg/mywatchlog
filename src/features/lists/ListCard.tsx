@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Check, Loader2, Pencil, Trash2, X } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -38,7 +39,9 @@ export default function ListCard({ list, online }: { list: ListSummary; online: 
 
   return (
     <article className="space-y-3 rounded-2xl border bg-card p-3 shadow-sm">
-      <PosterStrip posters={list.previews} />
+      <Link to={`/library/lists/${list.id}`} tabIndex={-1} aria-hidden="true" className="block">
+        <PosterStrip posters={list.previews} />
+      </Link>
 
       {editing ? (
         <form onSubmit={submit} onKeyDown={(event) => event.key === 'Escape' && stopEditing()} className="space-y-2">
@@ -65,7 +68,11 @@ export default function ListCard({ list, online }: { list: ListSummary; online: 
       ) : (
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="text-base font-semibold leading-snug [overflow-wrap:anywhere]">{list.name}</h3>
+            <h3 className="text-base font-semibold leading-snug [overflow-wrap:anywhere]">
+              <Link to={`/library/lists/${list.id}`} className="hover:underline">
+                {list.name}
+              </Link>
+            </h3>
             <p className="text-xs text-muted-foreground">
               {list.itemCount === 0 ? 'Aucun titre' : `${list.itemCount} titre${list.itemCount > 1 ? 's' : ''}`}
             </p>
