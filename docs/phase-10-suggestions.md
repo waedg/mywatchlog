@@ -1,6 +1,6 @@
 # Phase 10 — Suggestions par collection (cadrage)
 
-Statut : **cadrée le 2026-10-30, en attente du feu vert pour 10.1**. Décisions : section 6 (D-51).
+Statut : **terminée le 2026-10-30** (10.1 à 10.3 livrées et validées par les tests de l'utilisateur). Décisions : section 6 (D-51, D-52).
 
 ## 1. Objectif
 
@@ -58,3 +58,14 @@ Un bloc à la fois, validation de l'utilisateur entre chaque bloc.
 | 4 | Action sur une suggestion | Les deux : « Ajouter à la collection » et « Ajouter à Ma liste » |
 | 5 | Seuil | 3 titres minimum, avec message explicatif |
 | 6 | Rafraîchir (retour du 2026-10-30) | Option A : « Voir plus » par tranches de 20 (jusqu'à 60), aussi appliqué au « Pour toi » de Découvrir, ajout à la suite sans masquer l'existant (D-52). Écartés pour l'instant : page suivante TMDB (B), rotation des sources (C) |
+
+## 7. Réalisation
+
+| Bloc | Livré | Commit |
+|---|---|---|
+| 10.1 | `src/features/lists/suggestions.ts` (sources, clé de cache, exclusions) et `tests/suggestions.test.ts` | `5ef2e9e` |
+| 10.2 | `CollectionSuggestions.tsx` dans `ListDetailPage` | `ed6f27f` |
+| Voir plus | `ShowMoreButton.tsx`, `visibleSlice`, `remainingAfter` ; « Actualiser » retiré (D-52), « Pour toi » aligné | `8d38f8a` |
+| 10.3 | `SuggestionActions.tsx`, hook `useAddSuggestionToList` | `9e7811c` |
+
+Les titres « Abandonné » d'une collection servent de sources comme les autres (choix de l'utilisateur). Pistes reportées : B-060 (page suivante TMDB, rotation des sources), B-059 (extras des collections).
