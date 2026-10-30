@@ -1,5 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import { useAuth } from '@/features/auth/auth-context'
+import { addToLibrary } from '@/features/library/api'
+import { LIBRARY_KEY } from '@/features/library/useLibrary'
 import { ListError } from '@/lib/api-error'
 import { assertOnline } from '@/lib/online'
 import type { MediaType } from '../../../shared/tmdb-types'
@@ -28,6 +31,30 @@ export function useAddToList() {
       await addToList(listId, ref)
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: LISTS_KEY }),
+  })
+}
+
+/**
+ * Ajout d'une suggestion à la collection : le titre entre aussi dans Ma liste en « À regarder » s'il n'y est pas
+ * (statut, note et favori d'un titre déjà présent ne sont jamais modifiés). La limite est contrôlée avant tout appel réseau.
+ */
+export function useAddSuggestionToList() {
+  const queryClient = useQueryClient()
+  const { session } = useAuth()
+  return useMutation({
+    mutationFn: async ({ listId, ref, inLibrary }: { listId: string; ref: Ref; inLibrary: boolean }) => {
+      assertOnline()
+      const data = queryClient.getQueryData<ListsData>(LISTS_KEY)
+      if (data && countItems(data, listId) >= MAX_ITEMS_PER_LIST) throw new ListError('items_limit')
+      if (!inLibrary) {
+        const userId = session?.user.id
+        if (!userId) throw new Error('Session absente')
+        await addToLibrary(ref, userId)
+      }
+      await addToList(listId, ref)
+    },
+    onSuccess: () =>
+      Promise.all([queryClient.invalidateQueries({ queryKey: LISTS_KEY }), queryClient.invalidateQueries({ queryKey: LIBRARY_KEY })]),
   })
 }
 

@@ -8,13 +8,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { visibleSlice } from '@/features/discover/forYou'
 import ShowMoreButton from '@/features/discover/ShowMoreButton'
 import { GRID } from '@/features/discover/TmdbSection'
-import AddToLibraryButton from '@/features/library/AddToLibraryButton'
 import { libraryKey, type TypeFilter } from '@/features/library/group'
 import { useLibrary } from '@/features/library/useLibrary'
 import { getForYou } from '@/lib/api'
 import { apiErrorMessage } from '@/lib/api-error'
 
 import type { ListItemRow } from './derive'
+import SuggestionActions from './SuggestionActions'
 import {
   COLLECTION_MIN_SOURCES,
   collectionSuggestionsKey,
@@ -26,6 +26,7 @@ import {
 const DAY = 24 * 60 * 60_000
 
 interface Props {
+  listId: string
   /** Tous les titres de la collection (non filtrés : ce sont les sources). */
   items: ListItemRow[]
   /** Filtre de type de la page, appliqué aux suggestions. */
@@ -33,7 +34,7 @@ interface Props {
   online: boolean
 }
 
-export default function CollectionSuggestions({ items, type, online }: Props) {
+export default function CollectionSuggestions({ listId, items, type, online }: Props) {
   const library = useLibrary()
   const enough = hasEnoughSources(items)
   // Note et favori viennent de Ma liste : on attend son chargement pour ne pas changer de clé en cours de route.
@@ -117,7 +118,7 @@ export default function CollectionSuggestions({ items, type, online }: Props) {
                   <p className="px-0.5 text-xs text-muted-foreground">
                     {item.score > 1 ? `Suggéré via ${item.score} titres de la collection` : 'Suggéré via 1 titre de la collection'}
                   </p>
-                  <AddToLibraryButton item={item} inLibrary={owned.has(libraryKey(item.type, item.id))} />
+                  <SuggestionActions listId={listId} item={item} inLibrary={owned.has(libraryKey(item.type, item.id))} />
                 </div>
               }
             />

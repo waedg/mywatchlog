@@ -134,7 +134,7 @@ export default function ListDetailPage() {
             </div>
           )}
 
-          <CollectionSuggestions items={all} type={filter} online={online} />
+          <CollectionSuggestions listId={list.id} items={all} type={filter} online={online} />
         </>
       )}
     </section>
