@@ -17,6 +17,20 @@ export function useLists() {
 
 type Ref = { id: number; type: MediaType }
 
+/** Ajout d'un titre à une collection (limite de 500 titres contrôlée avant l'appel réseau). */
+export function useAddToList() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ listId, ref }: { listId: string; ref: Ref }) => {
+      assertOnline()
+      const data = queryClient.getQueryData<ListsData>(LISTS_KEY)
+      if (data && countItems(data, listId) >= MAX_ITEMS_PER_LIST) throw new ListError('items_limit')
+      await addToList(listId, ref)
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: LISTS_KEY }),
+  })
+}
+
 /** Retrait d'un titre d'une collection (hook léger : une instance par titre affiché). */
 export function useTakeFromList() {
   const queryClient = useQueryClient()
@@ -71,15 +85,7 @@ export function useListActions() {
     },
   })
 
-  const add = useMutation({
-    mutationFn: async ({ listId, ref }: { listId: string; ref: Ref }) => {
-      assertOnline()
-      const data = current()
-      if (data && countItems(data, listId) >= MAX_ITEMS_PER_LIST) throw new ListError('items_limit')
-      await addToList(listId, ref)
-    },
-    onSuccess: refresh,
-  })
+  const add = useAddToList()
 
   const take = useTakeFromList()
 

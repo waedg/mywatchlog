@@ -5,17 +5,23 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { apiErrorMessage } from '@/lib/api-error'
 
+import type { ListRow } from './derive'
 import { LIST_NAME_MAX } from './names'
 import { useListActions } from './useLists'
 
 /** Création d'une collection : champ de saisie en ligne (Entrée pour valider, Échap pour annuler). */
-export default function NewListForm({ onDone }: { onDone: () => void }) {
+export default function NewListForm({ onDone, onCreated }: { onDone: () => void; onCreated?: (list: ListRow) => void }) {
   const { create } = useListActions()
   const [name, setName] = useState('')
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    create.mutate(name, { onSuccess: onDone })
+    create.mutate(name, {
+      onSuccess: (list) => {
+        onCreated?.(list)
+        onDone()
+      },
+    })
   }
 
   return (
