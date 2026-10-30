@@ -1,6 +1,6 @@
 # Phase 8 — Découverte : recommandations et recherche (cadrage)
 
-Statut : **cadrée, décisions validées, aucun développement** (ordre de réalisation à valider) (2026-10-28).
+Statut : **terminée le 2026-10-30** (8.1 à 8.5 livrées et validées par les tests de l'utilisateur) (2026-10-28).
 
 ## 1. Périmètre
 
@@ -40,3 +40,15 @@ Inclus : recherche enrichie (tendances, populaires, exploration par critères), 
 4. Pas de filtre durée / genre sur le tirage : **pas de migration 006**.
 
 Conséquences : 8.2 devient la page Découvrir (sections Tendances et Populaires) ; la page Recherche n'est pas modifiée.
+
+## 6. Réalisation
+
+| Bloc | Livré | Remarques |
+|---|---|---|
+| 8.1 | API `trending`, `popular`, `genres`, `discover`, `forYou`, puis `watchProviders` (8.5) | Cache navigateur privé uniquement (D-42) |
+| 8.2 | Page Découvrir | Nav : entrée « Découvrir » |
+| 8.3 | « Que regarder ce soir ? » | Fonctionne hors connexion |
+| 8.4 | « Pour toi » | 3 sources minimum, cache 24 h |
+| 8.5 | Explorer (`/discover/explore`) | D-46 |
+
+Corrections liées, hors périmètre initial : alignement des boutons des cartes, pastille « Vu » cliquable (D-43), écritures refusées hors connexion (D-44), séries à numérotation continue (D-45).
