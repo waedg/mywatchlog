@@ -1,6 +1,6 @@
 # Phase 9 — Listes personnalisées (cadrage)
 
-Statut : **cadrage uniquement, aucun développement** (2026-10-30). Décisions à valider : section 7.
+Statut : **cadrée, décisions validées le 2026-10-30, aucun développement** (ordre de réalisation à valider). Décisions : section 7.
 
 ## 1. Objectif
 
@@ -16,7 +16,7 @@ Hors périmètre : partage ou liste publique, ordre manuel par glisser-déposer,
 | Renommer | Même validation ; renommage immédiat sur tous les appareils |
 | Supprimer | Confirmation ; supprime la liste et ses appartenances, **jamais** les titres de « Ma liste » |
 | Ajouter / retirer un titre | Un titre peut figurer dans plusieurs listes ; l'ajout est sans doublon dans une même liste |
-| Afficher une liste | Grille d'affiches (comme Ma liste), filtre Tout / Films / Séries, tri par date d'ajout ou par titre |
+| Afficher une liste | Grille d'affiches (comme Ma liste), filtre Tout / Films / Séries, triée par titre |
 | Aperçu des listes | Cartes avec le nom, le nombre de titres et une mosaïque de 4 affiches |
 | Hors connexion | Lecture seule, comme Ma liste ; écriture refusée avec le message dédié (D-44) |
 
@@ -64,7 +64,7 @@ La migration est appliquée sur Supabase et versionnée dans `supabase/migration
 |---|---|
 | Ma liste, onglets « Statuts / Listes » | Évite une sixième entrée dans la barre du bas, déjà pleine à 5 entrées. Route `/library/lists` |
 | Aperçu des listes | Cartes, bouton « Nouvelle liste » (champ de saisie en ligne), compteur |
-| Détail d'une liste | Titre de la liste avec renommer (crayon) et supprimer (confirmation), grille d'affiches, retrait d'un titre par une pastille, filtre de type, tri. Route `/library/lists/:id` |
+| Détail d'une liste | Titre de la liste avec renommer (crayon) et supprimer (confirmation), grille d'affiches triée par titre, retrait d'un titre par une pastille, filtre de type. Route `/library/lists/:id` |
 | Fiche d'un titre | Section « Listes » : cases à cocher des listes, avec création d'une liste sur place |
 
 ## 5. Découpage proposé
@@ -74,9 +74,8 @@ La migration est appliquée sur Supabase et versionnée dans `supabase/migration
 | 9.1 | Migration 006, RLS, types, vérification du conseiller de sécurité | Non (base) |
 | 9.2 | Couche données : requêtes et hooks (créer, renommer, supprimer, ajouter, retirer), validation du nom, persistance hors-ligne en lecture, tests | Non (tests) |
 | 9.3 | Onglet « Listes » dans Ma liste : aperçu, création, renommage, suppression | Oui |
-| 9.4 | Détail d'une liste : grille, retrait, filtre, tri | Oui |
+| 9.4 | Détail d'une liste : grille, retrait, filtre de type | Oui |
 | 9.5 | Fiche : section « Listes » pour ajouter ou retirer le titre | Oui |
-| 9.6 (option) | Ajout depuis Ma liste ou Découvrir (menu sur les cartes) ; sélecteur « Ajouter des titres » dans une liste | Oui |
 
 Chaque bloc est livré séparément, avec ton test entre deux.
 
@@ -91,12 +90,12 @@ Chaque bloc est livré séparément, avec ton test entre deux.
 | Liste très grande | Limites proposées : 50 listes et 500 titres par liste, contrôlées dans l'application |
 | Barre du bas déjà pleine sur mobile | Onglets dans Ma liste plutôt qu'une nouvelle entrée |
 
-## 7. Questions ouvertes
+## 7. Décisions validées (D-49, 2026-10-30)
 
-1. **Contenu des listes :** un titre d'une liste doit-il être dans « Ma liste » ? Option A : oui, retirer un titre de Ma liste le retire des listes. Option B (recommandée) : non, une liste peut contenir n'importe quel titre TMDB, indépendamment de Ma liste.
-2. **Un titre dans plusieurs listes :** oui (recommandé) ou une seule liste par titre ?
-3. **Noms en double :** interdits, insensible à la casse (recommandé), ou autorisés ?
-4. **Navigation :** onglets « Statuts / Listes » dans Ma liste (recommandé), ou une entrée dans la barre de navigation ?
-5. **Ajout de titres :** fiche seule (9.5), ou aussi depuis les cartes et un sélecteur dans la liste (9.6) ?
-6. **Ordre dans une liste :** tri par date d'ajout ou par titre au choix (recommandé), ou ordre manuel ?
-7. **Limites :** 50 listes et 500 titres par liste vous conviennent-ils ?
+1. **Contenu (option B) :** une liste peut contenir n'importe quel titre TMDB, indépendamment de « Ma liste ». Retirer un titre de Ma liste ne le retire pas des listes.
+2. **Plusieurs listes :** un même titre peut figurer dans plusieurs listes.
+3. **Noms en double :** interdits, sans distinction de majuscules ni d'espaces autour.
+4. **Navigation :** onglets « Statuts / Listes » dans Ma liste.
+5. **Ajout de titres :** depuis la fiche uniquement. Le bloc 9.6 (menu sur les cartes, sélecteur de titres) est abandonné ; il pourra être rouvert plus tard (B-059).
+6. **Ordre :** par titre (ordre alphabétique), sans choix de tri ni ordre manuel.
+7. **Limites :** 50 listes et 500 titres par liste.

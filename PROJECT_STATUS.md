@@ -38,7 +38,7 @@ Cadrage complet : document « MyWatchlog : Cadrage du projet » (artifact Claude
 | 6 | Notifications push, statistiques | En attente (décision du 2026-10-28) : découpage proposé (statistiques, notifications push, réglages), à relancer après la période d'utilisation |
 | 7 | Lecture de fichiers vidéo depuis le NAS (FileBrowser Quantum, Tailscale) | En attente (décision du 2026-10-28) : cadrée, sans développement, voir [docs/phase-7-nas.md](docs/phase-7-nas.md) ; essai de compatibilité 7.0 à faire par l'utilisateur |
 | 8 | Découverte : recommandations et recherche enrichie (hors fiche) | Terminée (2026-10-30) : 8.1 API, 8.2 page Découvrir, 8.3 « Que regarder ce soir ? », 8.4 « Pour toi », 8.5 Explorer. Voir [docs/phase-8-decouverte.md](docs/phase-8-decouverte.md) |
-| 9 | Listes personnalisées (créer, renommer, supprimer, grouper films et séries) | Cadrée, en attente de validation des décisions : voir [docs/phase-9-listes.md](docs/phase-9-listes.md) |
+| 9 | Listes personnalisées (créer, renommer, supprimer, grouper films et séries) | Cadrée, décisions validées (D-49), démarrage à valider : voir [docs/phase-9-listes.md](docs/phase-9-listes.md) |
 
 ## Checklist phase 0
 
