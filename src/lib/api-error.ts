@@ -29,11 +29,11 @@ export class ListError extends Error {
 }
 
 const LIST_ERROR_MESSAGES: Record<ListErrorCode, string> = {
-  empty: 'Donne un nom à la liste.',
+  empty: 'Donne un nom à la collection.',
   too_long: 'Le nom ne peut pas dépasser 60 caractères.',
-  duplicate: 'Une liste porte déjà ce nom.',
-  list_limit: 'Tu as atteint la limite de 50 listes.',
-  items_limit: 'Cette liste a atteint la limite de 500 titres.',
+  duplicate: 'Une collection porte déjà ce nom.',
+  list_limit: 'Tu as atteint la limite de 50 collections.',
+  items_limit: 'Cette collection a atteint la limite de 500 titres.',
 }
 
 /** Message affichable en français pour une erreur d'appel à l'API. */

@@ -53,6 +53,7 @@ Une décision validée n'est modifiée que par une nouvelle entrée qui la rempl
 | D-47 | 2026-10-30 | Fiche : choisir « Vu » sur une série coche tous les épisodes diffusés (comme la pastille des cartes) ; une série encore diffusée repasse « En cours » tant qu'il reste des épisodes à venir (D-33). Titres d'épisodes et de saisons affichés en entier (retour à la ligne) | Bug : série « Vu » avec compteur à 0 ; titres tronqués (One Piece) | |
 | D-48 | 2026-10-30 | Toute nouvelle page s'ouvre en haut (changement de chemin hors retour arrière ; les filtres dans l'URL ne font pas défiler). Ma liste : chaque groupe de statut est repliable, état mémorisé sur l'appareil (`mywatchlog-collapsed`), tout déplié par défaut | Bug : fiche ouverte au niveau de la fin de page ; listes qui grandissent | |
 | D-49 | 2026-10-30 | Phase 9 « Listes personnalisées » : listes privées pouvant contenir n'importe quel titre (indépendantes de Ma liste), un titre dans plusieurs listes, noms uniques insensibles à la casse, onglets « Statuts / Listes » dans Ma liste, ajout depuis la fiche uniquement, tri par titre, 50 listes et 500 titres par liste | Réponses de l'utilisateur ; blocs 9.1 à 9.5 (le bloc 9.6 est abandonné) | |
+| D-50 | 2026-10-30 | Vocabulaire de la phase 9 : « Collections » dans l'interface (onglet, boutons, messages, section de la fiche) ; le code, la base et la route (`/library/lists`) gardent le nom « lists » | Demande de l'utilisateur ; « Ma liste » (statuts) reste inchangé | |
 
 ## Modèle d'entrée
 

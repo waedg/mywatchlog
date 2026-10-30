@@ -2,6 +2,8 @@
 
 Statut : **cadrée, décisions validées le 2026-10-30, aucun développement** (ordre de réalisation à valider). Décisions : section 7.
 
+> **Vocabulaire (D-50) :** dans l'interface, les listes personnalisées s'appellent « Collections ». Le code, les tables (`lists`, `list_items`) et la route gardent le nom « lists ». « Ma liste » (classement par statut) ne change pas.
+
 ## 1. Objectif
 
 Créer des listes nommées pour grouper des films et des séries (par exemple « À voir en famille », « Classiques », « Soirées d'hiver »), les renommer et les supprimer. Une liste est privée, rattachée au compte, et synchronisée sur tous les appareils.

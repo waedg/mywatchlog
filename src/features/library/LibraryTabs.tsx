@@ -4,10 +4,10 @@ import { cn } from '@/lib/utils'
 
 const TABS = [
   { to: '/library', label: 'Statuts', end: true },
-  { to: '/library/lists', label: 'Listes', end: false },
+  { to: '/library/lists', label: 'Collections', end: false },
 ] as const
 
-/** Onglets de « Ma liste » : classement par statut, ou listes personnalisées (phase 9). */
+/** Onglets de « Ma liste » : classement par statut, ou collections personnalisées (phase 9). */
 export default function LibraryTabs() {
   return (
     <nav className="flex gap-1 rounded-full bg-secondary/60 p-1 w-fit" aria-label="Affichage de Ma liste">

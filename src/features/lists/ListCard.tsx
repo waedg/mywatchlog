@@ -10,7 +10,7 @@ import { LIST_NAME_MAX } from './names'
 import PosterStrip from './PosterStrip'
 import { useListActions } from './useLists'
 
-/** Carte d'une liste : mosaïque, nom, nombre de titres, renommer et supprimer (avec confirmation). */
+/** Carte d'une collection : mosaïque, nom, nombre de titres, renommer et supprimer (avec confirmation). */
 export default function ListCard({ list, online }: { list: ListSummary; online: boolean }) {
   const { rename, remove } = useListActions()
   const [editing, setEditing] = useState(false)
@@ -44,7 +44,7 @@ export default function ListCard({ list, online }: { list: ListSummary; online: 
         <form onSubmit={submit} onKeyDown={(event) => event.key === 'Escape' && stopEditing()} className="space-y-2">
           <Input
             autoFocus
-            aria-label={`Nouveau nom de la liste ${list.name}`}
+            aria-label={`Nouveau nom de la collection ${list.name}`}
             value={name}
             maxLength={LIST_NAME_MAX}
             onChange={(event) => {
@@ -94,7 +94,7 @@ export default function ListCard({ list, online }: { list: ListSummary; online: 
       {confirming && !editing && (
         <div role="alertdialog" aria-label={`Confirmer la suppression de ${list.name}`} className="space-y-3 rounded-xl border border-destructive/40 p-3">
           <p className="text-sm">
-            Supprimer la liste « {list.name} » ? Ses titres restent dans Ma liste et dans les autres listes.
+            Supprimer la collection « {list.name} » ? Ses titres restent dans Ma liste et dans les autres collections.
           </p>
           <div className="flex gap-2">
             <Button size="sm" variant="destructive" disabled={busy} onClick={() => remove.mutate(list.id)}>

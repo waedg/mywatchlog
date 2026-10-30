@@ -8,7 +8,7 @@ import { apiErrorMessage } from '@/lib/api-error'
 import { LIST_NAME_MAX } from './names'
 import { useListActions } from './useLists'
 
-/** Création d'une liste : champ de saisie en ligne (Entrée pour valider, Échap pour annuler). */
+/** Création d'une collection : champ de saisie en ligne (Entrée pour valider, Échap pour annuler). */
 export default function NewListForm({ onDone }: { onDone: () => void }) {
   const { create } = useListActions()
   const [name, setName] = useState('')
@@ -25,7 +25,7 @@ export default function NewListForm({ onDone }: { onDone: () => void }) {
       className="space-y-3 rounded-2xl border p-4"
     >
       <label className="block space-y-1.5">
-        <span className="text-xs font-medium text-muted-foreground">Nom de la nouvelle liste</span>
+        <span className="text-xs font-medium text-muted-foreground">Nom de la nouvelle collection</span>
         <Input
           autoFocus
           value={name}
