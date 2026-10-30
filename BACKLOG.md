@@ -77,3 +77,4 @@ Aucun pour l'instant.
 | B-055 | IDEA | Fiche : « Dans la même veine » (`/recommendations`), saga (`belongs_to_collection`), bande-annonce, filtre plateformes sur suggestions | 8 | P3 | Reporté (hors phase 8) |
 | B-056 | IDEA | Statistiques : genres les plus vus (phase 6, nécessite les genres en base) | 6 | P3 | Reporté |
 | B-057 | TODO | Phase 8.1 à 8.5 : voir docs/phase-8-decouverte.md | 8 | P2 | Résolu (2026-10-30) |
+| B-058 | TODO | Phase 9.1 à 9.6 : listes personnalisées, voir docs/phase-9-listes.md | 9 | P2 | En attente de validation |
