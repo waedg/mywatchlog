@@ -13,6 +13,66 @@ export type Database = {
         Update: { email?: string }
         Relationships: []
       }
+      list_items: {
+        Row: {
+          added_at: string
+          list_id: string
+          title_id: number
+          title_type: string
+        }
+        Insert: {
+          added_at?: string
+          list_id: string
+          title_id: number
+          title_type: string
+        }
+        Update: {
+          added_at?: string
+          list_id?: string
+          title_id?: number
+          title_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "list_items_title_id_title_type_fkey"
+            columns: ["title_id", "title_type"]
+            isOneToOne: false
+            referencedRelation: "titles"
+            referencedColumns: ["id", "type"]
+          },
+        ]
+      }
+      lists: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       titles: {
         Row: {
           id: number
