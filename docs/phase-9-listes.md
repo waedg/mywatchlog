@@ -1,6 +1,6 @@
 # Phase 9 — Listes personnalisées (cadrage)
 
-Statut : **cadrée, décisions validées le 2026-10-30, aucun développement** (ordre de réalisation à valider). Décisions : section 7.
+Statut : **terminée le 2026-10-30** (9.1 à 9.5 livrées et validées par les tests de l'utilisateur). Décisions : section 7.
 
 > **Vocabulaire (D-50) :** dans l'interface, les listes personnalisées s'appellent « Collections ». Le code, les tables (`lists`, `list_items`) et la route gardent le nom « lists ». « Ma liste » (classement par statut) ne change pas.
 
@@ -101,3 +101,15 @@ Chaque bloc est livré séparément, avec ton test entre deux.
 5. **Ajout de titres :** depuis la fiche uniquement. Le bloc 9.6 (menu sur les cartes, sélecteur de titres) est abandonné ; il pourra être rouvert plus tard (B-059).
 6. **Ordre :** par titre (ordre alphabétique), sans choix de tri ni ordre manuel.
 7. **Limites :** 50 listes et 500 titres par liste.
+
+## 8. Réalisation
+
+| Bloc | Livré |
+|---|---|
+| 9.1 | Migration 006 (`lists`, `list_items`, RLS, limites 50 / 500, tests d'accès croisés entre deux comptes) |
+| 9.2 | Couche données : validation, requêtes, hooks, lecture hors-ligne |
+| 9.3 | Onglet « Collections » de Ma liste : aperçu, création, renommage, suppression |
+| 9.4 | Détail d'une collection : grille triée par titre, filtre de type, retrait |
+| 9.5 | Section « Collections » de la fiche : cocher, créer sur place |
+
+Écart assumé : le retrait d'un titre est un bouton sous la carte plutôt qu'une pastille (évite les retraits accidentels au pouce). Idées reportées : B-059.
