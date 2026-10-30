@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { groupByStatus, libraryKey, parseTypeFilter, STATUS_LABELS, type TypeFilter } from '@/features/library/group'
 import TvProgress from '@/features/episodes/TvProgress'
 import { useWatched } from '@/features/episodes/useEpisodes'
+import LibraryTabs from '@/features/library/LibraryTabs'
 import QuickWatchedButton, { WatchedMark } from '@/features/library/QuickWatchedButton'
 import { useCollapsedGroups } from '@/features/library/useCollapsed'
 import { useLibrary } from '@/features/library/useLibrary'
@@ -46,6 +47,8 @@ export default function LibraryPage() {
   return (
     <section className="space-y-6">
       <h1 className="text-2xl font-bold tracking-tight">Ma liste</h1>
+
+      <LibraryTabs />
 
       <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrer par type">
         {FILTERS.map(({ value, label }) => (
