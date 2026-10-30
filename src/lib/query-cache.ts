@@ -6,7 +6,7 @@ export const CACHE_KEY = 'mywatchlog-cache'
 export const ALLOWED_KEY = 'mywatchlog-allowed'
 export const CACHE_MAX_AGE = 7 * 24 * 60 * 60 * 1000
 /** Seules ces requêtes sont persistées (aucune donnée TMDB). */
-export const PERSISTED_KEYS = ['library', 'watched-all']
+export const PERSISTED_KEYS = ['library', 'watched-all', 'lists']
 
 export function rememberAllowed(userId: string | null): void {
   try {

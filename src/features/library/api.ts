@@ -33,14 +33,11 @@ export async function fetchLibrary(): Promise<LibraryItem[]> {
   return items
 }
 
-/**
- * Ajoute un titre à la liste : récupère les détails (imdb_id), met à jour le cache `titles`,
- * puis crée la ligne `user_titles` (sans écraser une ligne existante).
- */
-export async function addToLibrary(item: Pick<SearchResult, 'id' | 'type'>, userId: string): Promise<void> {
+/** Enregistre (ou rafraîchit) le titre dans le cache `titles` à partir de ses détails TMDB (clé requise par les listes et Ma liste). */
+export async function cacheTitle(item: Pick<SearchResult, 'id' | 'type'>): Promise<{ id: number; type: MediaType }> {
   const details = await getTitleDetails(item.type, item.id)
 
-  const { error: titleError } = await supabase.from('titles').upsert(
+  const { error } = await supabase.from('titles').upsert(
     {
       id: details.id,
       type: details.type,
@@ -54,10 +51,19 @@ export async function addToLibrary(item: Pick<SearchResult, 'id' | 'type'>, user
     },
     { onConflict: 'id,type' },
   )
-  if (titleError) throw titleError
+  if (error) throw error
+  return { id: details.id, type: details.type }
+}
+
+/**
+ * Ajoute un titre à la liste : récupère les détails (imdb_id), met à jour le cache `titles`,
+ * puis crée la ligne `user_titles` (sans écraser une ligne existante).
+ */
+export async function addToLibrary(item: Pick<SearchResult, 'id' | 'type'>, userId: string): Promise<void> {
+  const title = await cacheTitle(item)
 
   const { error: linkError } = await supabase.from('user_titles').upsert(
-    { user_id: userId, title_id: details.id, title_type: details.type, status: 'to_watch' },
+    { user_id: userId, title_id: title.id, title_type: title.type, status: 'to_watch' },
     { onConflict: 'user_id,title_id,title_type', ignoreDuplicates: true },
   )
   if (linkError) throw linkError
