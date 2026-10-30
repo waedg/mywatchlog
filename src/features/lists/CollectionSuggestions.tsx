@@ -1,9 +1,12 @@
-import { RefreshCw, WifiOff } from 'lucide-react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { WifiOff } from 'lucide-react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
 import PosterCard from '@/components/PosterCard'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { visibleSlice } from '@/features/discover/forYou'
+import ShowMoreButton from '@/features/discover/ShowMoreButton'
 import { GRID } from '@/features/discover/TmdbSection'
 import AddToLibraryButton from '@/features/library/AddToLibraryButton'
 import { libraryKey, type TypeFilter } from '@/features/library/group'
@@ -31,13 +34,16 @@ interface Props {
 }
 
 export default function CollectionSuggestions({ items, type, online }: Props) {
-  const queryClient = useQueryClient()
   const library = useLibrary()
   const enough = hasEnoughSources(items)
   // Note et favori viennent de Ma liste : on attend son chargement pour ne pas changer de clé en cours de route.
   const libraryReady = library.isSuccess || library.isError
   const sources = pickCollectionSources(items, library.data ?? [])
   const queryKey = collectionSuggestionsKey(sources)
+  // Nombre de tranches affichées, remis à 1 quand les sources changent.
+  const cacheKey = queryKey[1]
+  const [expanded, setExpanded] = useState({ key: cacheKey, pages: 1 })
+  const pages = expanded.key === cacheKey ? expanded.pages : 1
   const owned = new Set((library.data ?? []).map((entry) => libraryKey(entry.type, entry.id)))
 
   const query = useQuery({
@@ -48,26 +54,13 @@ export default function CollectionSuggestions({ items, type, online }: Props) {
     gcTime: DAY,
   })
 
-  const results = filterCollectionSuggestions(query.data?.results ?? [], items, type)
+  const filtered = filterCollectionSuggestions(query.data?.results ?? [], items, type, Infinity)
+  const results = visibleSlice(filtered, pages)
   const loading = enough && online && (!libraryReady || (query.isPending && query.fetchStatus !== 'paused'))
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">Suggestions</h2>
-        {enough && online && (
-          <Button
-            size="sm"
-            variant="ghost"
-            className="text-muted-foreground"
-            disabled={query.isFetching}
-            onClick={() => void queryClient.invalidateQueries({ queryKey })}
-          >
-            <RefreshCw className={query.isFetching ? 'animate-spin' : undefined} />
-            Actualiser
-          </Button>
-        )}
-      </div>
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">Suggestions</h2>
 
       {!enough && (
         <p className="rounded-2xl border border-dashed px-4 py-6 text-sm text-muted-foreground">
@@ -130,6 +123,10 @@ export default function CollectionSuggestions({ items, type, online }: Props) {
             />
           ))}
         </div>
+      )}
+
+      {enough && online && query.isSuccess && (
+        <ShowMoreButton total={filtered.length} pages={pages} onMore={() => setExpanded({ key: cacheKey, pages: pages + 1 })} />
       )}
     </div>
   )

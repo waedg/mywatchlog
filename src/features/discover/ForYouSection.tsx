@@ -1,5 +1,6 @@
-import { RefreshCw, WifiOff } from 'lucide-react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { WifiOff } from 'lucide-react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
 import PosterCard from '@/components/PosterCard'
 import { Button } from '@/components/ui/button'
@@ -9,7 +10,8 @@ import { libraryKey, type LibraryItem, type TypeFilter } from '@/features/librar
 import { apiErrorMessage } from '@/lib/api-error'
 import { getForYou } from '@/lib/api'
 
-import { FOR_YOU_MIN_SOURCES, filterForYou, forYouCacheKey, pickForYouSources } from './forYou'
+import { FOR_YOU_MIN_SOURCES, filterForYou, forYouCacheKey, pickForYouSources, visibleSlice } from './forYou'
+import ShowMoreButton from './ShowMoreButton'
 import { GRID } from './TmdbSection'
 
 const DAY = 24 * 60 * 60_000
@@ -21,10 +23,12 @@ interface Props {
 }
 
 export default function ForYouSection({ items, type, owned }: Props) {
-  const queryClient = useQueryClient()
   const sources = pickForYouSources(items)
   const enough = sources.length >= FOR_YOU_MIN_SOURCES
   const cacheKey = forYouCacheKey(sources)
+  // Nombre de tranches affichées, remis à 1 quand les sources changent.
+  const [expanded, setExpanded] = useState({ key: cacheKey, pages: 1 })
+  const pages = expanded.key === cacheKey ? expanded.pages : 1
 
   const query = useQuery({
     queryKey: ['for-you', cacheKey],
@@ -34,25 +38,12 @@ export default function ForYouSection({ items, type, owned }: Props) {
     gcTime: DAY,
   })
 
-  const results = filterForYou(query.data?.results ?? [], owned, type)
+  const filtered = filterForYou(query.data?.results ?? [], owned, type, Infinity)
+  const results = visibleSlice(filtered, pages)
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">Pour toi</h2>
-        {enough && (
-          <Button
-            size="sm"
-            variant="ghost"
-            className="text-muted-foreground"
-            disabled={query.isFetching}
-            onClick={() => void queryClient.invalidateQueries({ queryKey: ['for-you', cacheKey] })}
-          >
-            <RefreshCw className={query.isFetching ? 'animate-spin' : undefined} />
-            Actualiser
-          </Button>
-        )}
-      </div>
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">Pour toi</h2>
 
       {!enough && (
         <p className="rounded-2xl border border-dashed px-4 py-6 text-sm text-muted-foreground">
@@ -115,6 +106,10 @@ export default function ForYouSection({ items, type, owned }: Props) {
             />
           ))}
         </div>
+      )}
+
+      {enough && query.isSuccess && (
+        <ShowMoreButton total={filtered.length} pages={pages} onMore={() => setExpanded({ key: cacheKey, pages: pages + 1 })} />
       )}
     </div>
   )

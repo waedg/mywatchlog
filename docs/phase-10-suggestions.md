@@ -26,7 +26,8 @@ Réutilisation de l'action serveur `forYou` (aucune modification de l'API, aucun
 | Notes | La note et le favori viennent de Ma liste ; un titre de la collection absent de Ma liste n'a ni note ni favori (classé par ordre alphabétique) |
 | Exclusions | Uniquement les titres de la collection. Un titre déjà dans Ma liste mais pas dans la collection reste proposé, avec sa pastille de statut |
 | Ajout depuis une suggestion | Deux actions : « Ajouter à la collection » (ajoute aussi à Ma liste en « À regarder » si le titre n'y est pas) et « Ajouter à Ma liste » seule |
-| Cache | Clé stable indépendante de l'ordre des sources ; invalidée quand la composition de la collection change ; `no-store` côté serveur (D-42) |
+| Cache | Clé stable indépendante de l'ordre des sources ; nouvelle clé (donc nouveau calcul) quand la composition de la collection change ; `no-store` côté serveur (D-42) |
+| Voir plus | Pas de bouton « Actualiser » (même réponse avec les mêmes sources). Tranches de 20 affichées à la suite jusqu'aux 60 résultats renvoyés par `forYou` (D-52) ; composant partagé avec « Pour toi » |
 | Hors connexion | Section masquée avec un message ; actions refusées (D-44) |
 | Limites connues | Recommandations TMDB plutôt grand public ; collection hétérogène = résultats bruités ; collection de 3 titres = scores majoritairement égaux à 1 |
 
@@ -56,3 +57,4 @@ Un bloc à la fois, validation de l'utilisateur entre chaque bloc.
 | 3 | Plus de 15 titres | Échantillon fixe (notes, favoris, alphabétique) |
 | 4 | Action sur une suggestion | Les deux : « Ajouter à la collection » et « Ajouter à Ma liste » |
 | 5 | Seuil | 3 titres minimum, avec message explicatif |
+| 6 | Rafraîchir (retour du 2026-10-30) | Option A : « Voir plus » par tranches de 20 (jusqu'à 60), aussi appliqué au « Pour toi » de Découvrir, ajout à la suite sans masquer l'existant (D-52). Écartés pour l'instant : page suivante TMDB (B), rotation des sources (C) |

@@ -5,7 +5,7 @@ import { libraryKey, type LibraryItem, type TypeFilter } from '../library/group'
 export const FOR_YOU_MIN_SOURCES = 3
 /** Plafond imposé par l'API (une requête TMDB par source). */
 export const FOR_YOU_MAX_SOURCES = 15
-/** Nombre de recommandations affichées. */
+/** Nombre de recommandations affichées par tranche (« Voir plus » ajoute une tranche). */
 export const FOR_YOU_DISPLAY = 20
 /** Note à partir de laquelle un titre sert de source. */
 export const FOR_YOU_MIN_RATING = 8
@@ -52,4 +52,15 @@ export function filterForYou(
     .filter((result) => !owned.has(libraryKey(result.type, result.id)))
     .filter((result) => type === 'all' || result.type === type)
     .slice(0, limit)
+}
+
+/** Premières `pages` tranches d'une liste de résultats (la première tranche est toujours affichée). */
+export function visibleSlice<T>(items: T[], pages: number, pageSize = FOR_YOU_DISPLAY): T[] {
+  return items.slice(0, Math.max(1, pages) * pageSize)
+}
+
+/** Nombre de résultats encore masqués, et taille de la prochaine tranche. */
+export function remainingAfter(total: number, pages: number, pageSize = FOR_YOU_DISPLAY): { hidden: number; next: number } {
+  const hidden = Math.max(0, total - Math.max(1, pages) * pageSize)
+  return { hidden, next: Math.min(hidden, pageSize) }
 }

@@ -79,3 +79,4 @@ Aucun pour l'instant.
 | B-057 | TODO | Phase 8.1 à 8.5 : voir docs/phase-8-decouverte.md | 8 | P2 | Résolu (2026-10-30) |
 | B-058 | TODO | Phase 9.1 à 9.5 : listes personnalisées, voir docs/phase-9-listes.md | 9 | P2 | Résolu (2026-10-30) |
 | B-059 | IDEA | Listes : ajout de titres depuis les cartes (menu) et sélecteur « Ajouter des titres » dans une liste ; tri par date d'ajout ou ordre manuel | 9 | P3 | Reporté |
+| B-060 | IDEA | Suggestions : au-delà de 60 résultats, charger la page suivante de `/recommendations` (paramètre `page` de `forYou`) ou faire tourner l'échantillon de sources pour les collections de plus de 15 titres | 10 | P3 | Reporté |

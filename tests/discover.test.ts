@@ -96,7 +96,7 @@ describe('rerollSeed', () => {
 })
 
 import type { ForYouResult } from '../shared/tmdb-types'
-import { FOR_YOU_MAX_SOURCES, filterForYou, forYouCacheKey, pickForYouSources } from '../src/features/discover/forYou'
+import { FOR_YOU_MAX_SOURCES, filterForYou, forYouCacheKey, pickForYouSources, remainingAfter, visibleSlice } from '../src/features/discover/forYou'
 
 describe('pickForYouSources', () => {
   it('garde les notes >= 8 et les favoris, hors abandonnés ; les « Vu » sans note ne comptent pas', () => {
@@ -205,5 +205,24 @@ describe('toDiscoverFilters / toggleGenre / activeFilterCount', () => {
   it('compte les filtres actifs', () => {
     expect(activeFilterCount(base)).toBe(3)
     expect(activeFilterCount(parseExplore(new URLSearchParams('sort=date&type=tv')))).toBe(0)
+  })
+})
+
+describe('« Voir plus »', () => {
+  const items = Array.from({ length: 60 }, (_, i) => i)
+  it('affiche une tranche de 20 puis ajoute à la suite sans rien retirer', () => {
+    expect(visibleSlice(items, 1)).toHaveLength(20)
+    expect(visibleSlice(items, 2).slice(0, 20)).toEqual(visibleSlice(items, 1))
+    expect(visibleSlice(items, 3)).toHaveLength(60)
+    expect(visibleSlice(items, 9)).toHaveLength(60)
+  })
+  it('affiche toujours au moins la première tranche', () => {
+    expect(visibleSlice(items, 0)).toHaveLength(20)
+  })
+  it('calcule les résultats masqués et la taille de la prochaine tranche', () => {
+    expect(remainingAfter(60, 1)).toEqual({ hidden: 40, next: 20 })
+    expect(remainingAfter(45, 2)).toEqual({ hidden: 5, next: 5 })
+    expect(remainingAfter(45, 3)).toEqual({ hidden: 0, next: 0 })
+    expect(remainingAfter(10, 1)).toEqual({ hidden: 0, next: 0 })
   })
 })
