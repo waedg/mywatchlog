@@ -15,7 +15,7 @@ import { sameSeasonCounts, toSeasonCounts } from '@/features/episodes/progress'
 import { syncTvMeta } from '@/features/episodes/api'
 import { applyAutoStatus, learnSeasonFirsts } from '@/features/episodes/service'
 import { useAuth } from '@/features/auth/auth-context'
-import { useWatched } from '@/features/episodes/useEpisodes'
+import { useEpisodeActions, useWatched } from '@/features/episodes/useEpisodes'
 import AddToLibraryButton from '@/features/library/AddToLibraryButton'
 import {
   isValidRating,
@@ -194,9 +194,19 @@ function Actions({ entry }: { entry: LibraryItem }) {
   const ref = { id: entry.id, type: entry.type }
   const update = useUpdateUserTitle(ref)
   const remove = useRemoveFromLibrary(ref)
+  const episodes = useEpisodeActions(entry.id)
   const [confirming, setConfirming] = useState(false)
 
-  const error = update.error ?? remove.error
+  const error = update.error ?? remove.error ?? episodes.error
+  const busy = update.isPending || episodes.isPending
+
+  const changeStatus = (status: LibraryItem['status']) => {
+    if (entry.status === status) return
+    // Série « Vu » : les épisodes diffusés sont cochés pour que les compteurs suivent le statut.
+    // Une série encore diffusée repasse « En cours » tant qu'il reste des épisodes à venir (D-33).
+    if (entry.type === 'tv' && status === 'watched') update.mutate(statusPatch(status), { onSuccess: () => episodes.markAllAired() })
+    else update.mutate(statusPatch(status))
+  }
 
   return (
     <div className="space-y-5 rounded-2xl border p-4">
@@ -210,8 +220,8 @@ function Actions({ entry }: { entry: LibraryItem }) {
               variant={entry.status === status ? 'default' : 'outline'}
               className={cn('rounded-full', entry.status !== status && 'text-muted-foreground')}
               aria-pressed={entry.status === status}
-              disabled={update.isPending}
-              onClick={() => entry.status !== status && update.mutate(statusPatch(status))}
+              disabled={busy}
+              onClick={() => changeStatus(status)}
             >
               {STATUS_LABELS[status]}
             </Button>

@@ -93,7 +93,7 @@ function SeasonPanel({ tvId, season, watched, expanded, onToggle, actions }: Pan
           onClick={onToggle}
         >
           <Chevron className="size-4 shrink-0 text-muted-foreground" />
-          <span className="truncate text-sm font-medium">{label}</span>
+          <span className="text-sm font-medium [overflow-wrap:anywhere]">{label}</span>
           <span className={cn('ml-auto shrink-0 text-xs', complete ? 'text-primary' : 'text-muted-foreground')}>
             {done}/{season.episodeCount}
           </span>
@@ -176,7 +176,7 @@ function SeasonEpisodes({
               {isWatched && <Check className="size-4" />}
             </button>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm">
+              <p className="text-sm [overflow-wrap:anywhere]">
                 <span className="text-muted-foreground">E{episode.episodeNumber}</span> {episode.name}
               </p>
               <p className="text-xs text-muted-foreground">
