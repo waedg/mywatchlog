@@ -177,3 +177,11 @@ Limites connues du bloc : la grille et les filtres de `DescribeSearch` dupliquen
 - Logique pure `isCoolingDown` testée (délai actif, levé à 3 s exactes, cache ancien, durée personnalisée).
 - Les autres états (hors connexion, quota, aucun résultat, indisponible) étaient déjà livrés au bloc 11.2 et n'ont pas changé.
 - Reste à faire en 11.4, après ton test en production : mesurer le quota gratuit réel dans AI Studio, essayer 5 à 15 descriptions réelles, clôturer les fichiers de suivi.
+
+### Mise en production et incident de clé (2026-11-06)
+
+- Fusion dans `main` par fast-forward, sans pull request : l'intégration GitHub de la session n'a pas la permission « Pull requests » (création refusée en 403 « Resource not accessible by integration », 4 essais). Pour les prochaines phases, soit activer cette permission, soit assumer le push direct après accord explicite.
+- Premier test en production : message « momentanément indisponible » alors que des requêtes apparaissaient dans AI Studio (elles venaient du script d'essai). Cause : `GEMINI_API_KEY` mal enregistrée dans Vercel. Gemini répondait HTTP 400 en environ 30 ms ; la clé a été collée de nouveau dans Vercel, la recherche fonctionne.
+- Diagnostic rendu possible par deux ajouts dans `api/tmdb.ts` : une ligne `[describe] échec Gemini : <motif> après <durée> ms — <message Google>` dans les journaux Vercel (jamais la clé ni la description), et un champ `reason` non sensible dans la réponse 502 / 429 (`timeout`, `http_<code>`, `network`, `bad_response`).
+- Les variables d'environnement ne s'appliquent qu'aux nouveaux déploiements : après toute modification de `GEMINI_API_KEY` ou `GEMINI_MODEL`, redéployer.
+- La branche `feat/phase-11-describe` est fusionnée ; sa suppression sur GitHub reste à faire à la main (suppression de branche refusée depuis la session).
