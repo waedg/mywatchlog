@@ -12,6 +12,18 @@ export interface SearchResult {
   overview: string
 }
 
+/** Candidat proposé par le modèle (phase 11) : jamais d'identifiant TMDB, seulement titre, année et type. */
+export interface DescribeCandidate {
+  title: string
+  year: number | null
+  type: MediaType
+}
+
+/** Réponse de l'action `describe` : résultats TMDB vérifiés, 5 au maximum. */
+export interface DescribeResponse {
+  results: SearchResult[]
+}
+
 export interface SearchResponse {
   page: number
   totalPages: number
