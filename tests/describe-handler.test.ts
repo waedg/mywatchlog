@@ -116,26 +116,41 @@ describe('api/tmdb : action describe (phase 11.1)', () => {
       const fetchMock = setup({ gemini: () => Response.json({ error: { code: status } }, { status }) })
       const response = await describeCall('une description')
       expect(response.status, String(status)).toBe(429)
-      expect(((await response.json()) as { error: string }).error).toBe('ai_quota')
+      expect(await response.json()).toEqual({ error: 'ai_quota', reason: `http_${status}` })
       expect(callsTo(fetchMock, 'api.themoviedb.org')).toHaveLength(0)
       vi.unstubAllGlobals()
     }
   })
 
-  it('502 ai_unavailable pour une erreur Gemini, un délai dépassé ou une panne réseau', async () => {
-    for (const gemini of [
-      () => Response.json({ error: 'boom' }, { status: 500 }),
-      () => {
-        throw new DOMException('délai', 'TimeoutError')
+  it('502 ai_unavailable avec un motif non sensible, journalisé côté serveur', async () => {
+    const cases: { gemini: () => Response; reason: string }[] = [
+      { gemini: () => Response.json({ error: 'boom' }, { status: 500 }), reason: 'http_500' },
+      { gemini: () => Response.json({ error: 'absent' }, { status: 404 }), reason: 'http_404' },
+      {
+        gemini: () => {
+          throw new DOMException('délai', 'TimeoutError')
+        },
+        reason: 'timeout',
       },
-      () => {
-        throw new TypeError('fetch failed')
+      {
+        gemini: () => {
+          throw new TypeError('fetch failed')
+        },
+        reason: 'network',
       },
-    ]) {
+      { gemini: () => new Response('<html>pas du JSON', { status: 200 }), reason: 'bad_response' },
+    ]
+    for (const { gemini, reason } of cases) {
       setup({ gemini })
-      const response = await describeCall('une description')
-      expect(response.status).toBe(502)
-      expect(((await response.json()) as { error: string }).error).toBe('ai_unavailable')
+      const logs = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const response = await describeCall('une description secrète')
+      expect(response.status, reason).toBe(502)
+      expect(await response.json()).toEqual({ error: 'ai_unavailable', reason })
+      const logged = logs.mock.calls.flat().join(' ')
+      expect(logged).toContain(reason)
+      expect(logged).not.toContain(GEMINI_KEY)
+      expect(logged).not.toContain('secrète')
+      logs.mockRestore()
       vi.unstubAllGlobals()
     }
   })

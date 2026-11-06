@@ -652,6 +652,18 @@ class GeminiError extends Error {
   }
 }
 
+/**
+ * Motif non sensible d'un échec Gemini, pour le journal serveur et le champ `reason` de la réponse 502 :
+ * `timeout`, `http_<code>`, `network` (échec de connexion) ou `bad_response` (réponse illisible).
+ * Ne contient ni la clé, ni la description, ni le contenu de la réponse.
+ */
+export function describeGeminiFailure(error: unknown): string {
+  if (error instanceof GeminiError) return `http_${error.status}`
+  if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) return 'timeout'
+  if (error instanceof TypeError) return 'network'
+  return 'bad_response'
+}
+
 /** Appelle l'API Interactions de Gemini et renvoie le texte généré. La clé voyage dans un en-tête, jamais dans l'URL. */
 async function callGemini(description: string, apiKey: string, model: string): Promise<string> {
   const response = await fetch(`${GEMINI_BASE}/interactions`, {
@@ -905,14 +917,17 @@ export default {
         if (!apiKey || !model) return json({ error: 'server_misconfigured' }, 500)
 
         let text: string
+        const startedAt = Date.now()
         try {
           text = await callGemini(description, apiKey, model)
         } catch (error) {
+          const reason = describeGeminiFailure(error)
+          console.error(`[describe] échec Gemini : ${reason} après ${Date.now() - startedAt} ms`)
           // 429 : quota gratuit atteint ; 402 : crédits épuisés. Aucun repli vers un autre fournisseur.
           if (error instanceof GeminiError && (error.status === 429 || error.status === 402)) {
-            return json({ error: 'ai_quota' }, 429)
+            return json({ error: 'ai_quota', reason }, 429)
           }
-          return json({ error: 'ai_unavailable' }, 502)
+          return json({ error: 'ai_unavailable', reason }, 502)
         }
 
         const candidates = parseCandidates(text)
