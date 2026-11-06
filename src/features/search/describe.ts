@@ -16,6 +16,14 @@ export function normalizeDescriptionInput(value: string | null | undefined): str
   return cleaned
 }
 
+/** Délai après chaque réponse (réussie ou non) avant une nouvelle recherche : protège le quota gratuit. */
+export const DESCRIBE_COOLDOWN_MS = 3000
+
+/** `settledAt` : horodatage de la dernière réponse (0 si aucune). */
+export function isCoolingDown(settledAt: number, now: number, cooldownMs = DESCRIBE_COOLDOWN_MS): boolean {
+  return settledAt > 0 && now < settledAt + cooldownMs
+}
+
 /** Paramètre d'URL `mode` : seule la valeur « description » est stockée, le mode Titre est le défaut. */
 export type SearchMode = 'title' | 'description'
 

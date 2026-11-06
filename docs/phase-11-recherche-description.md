@@ -1,6 +1,6 @@
 # Phase 11 — Recherche par description (cadrage)
 
-Statut : **en cours** (2026-11-06). Cadrage validé (D-53), modèle `gemini-3.1-flash-lite`. Bloc 11.1 (action serveur `describe`) livré ; bloc 11.2 (interface) livré, à tester après fusion dans `main` ; 11.3 (états et délai) et 11.4 (clôture) à faire. Réalisation : section 8.
+Statut : **en cours** (2026-11-06). Cadrage validé (D-53), modèle `gemini-3.1-flash-lite`. Bloc 11.1 (action serveur `describe`) livré ; blocs 11.2 (interface) et 11.3 (délai entre deux recherches) livrés sur `feat/phase-11-describe`, à tester en production après fusion dans `main` ; 11.4 (clôture) à faire après ce test. Réalisation : section 8.
 
 ## 1. Objectif
 
@@ -168,4 +168,12 @@ Sur la page Recherche, un sélecteur **Titre / Description** (paramètre d'URL `
 
 Fichiers : `src/components/ui/textarea.tsx`, `src/features/search/{describe.ts, useDescribe.ts, DescribeSearch.tsx}`, `src/lib/{api.ts, api-error.ts}`, `src/pages/SearchPage.tsx` (l'ancien corps devient `TitleSearch`, comportement identique), `tests/describe-client.test.ts`.
 
-Limites connues du bloc : la grille et les filtres de `DescribeSearch` dupliquent ceux de la recherche par titre (environ 40 lignes, choix assumé pour ne pas toucher au mode Titre) ; l'interface n'a pas été vue en navigateur par l'auteur du code, seulement compilée et testée sur sa logique ; le délai de 3 s entre deux soumissions est reporté au bloc 11.3.
+Limites connues du bloc : la grille et les filtres de `DescribeSearch` dupliquent ceux de la recherche par titre (environ 40 lignes, choix assumé pour ne pas toucher au mode Titre) ; l'interface n'a pas été vue en navigateur par l'auteur du code, seulement compilée et testée sur sa logique ; le délai de 3 s entre deux soumissions est traité au bloc 11.3.
+
+### Bloc 11.3 — délai entre deux recherches (2026-11-06)
+
+- Règle : après chaque réponse de l'IA (réussie ou en erreur), le bouton « Rechercher », la touche Entrée et « Réessayer » sont désactivés pendant **3 secondes** (`DESCRIBE_COOLDOWN_MS`), avec le message « Patiente un instant avant une nouvelle recherche. ». Le bouton est aussi désactivé pendant le chargement.
+- Le délai part de l'horodatage de la dernière réponse (`dataUpdatedAt` / `errorUpdatedAt`) : une recherche restituée depuis le cache au retour arrière ne déclenche aucun délai.
+- Logique pure `isCoolingDown` testée (délai actif, levé à 3 s exactes, cache ancien, durée personnalisée).
+- Les autres états (hors connexion, quota, aucun résultat, indisponible) étaient déjà livrés au bloc 11.2 et n'ont pas changé.
+- Reste à faire en 11.4, après ton test en production : mesurer le quota gratuit réel dans AI Studio, essayer 5 à 15 descriptions réelles, clôturer les fichiers de suivi.

@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { DESCRIBE_MAX_CHARS as SERVER_MAX, DESCRIBE_MIN_CHARS as SERVER_MIN, normalizeDescription } from '../api/tmdb'
 import { ApiError, apiErrorMessage } from '../src/lib/api-error'
 import {
+  DESCRIBE_COOLDOWN_MS,
   DESCRIBE_MAX_CHARS,
   DESCRIBE_MIN_CHARS,
+  isCoolingDown,
   normalizeDescriptionInput,
   parseSearchMode,
 } from '../src/features/search/describe'
@@ -46,6 +48,28 @@ describe('cohérence client / serveur', () => {
     for (const sample of samples) {
       expect(normalizeDescriptionInput(sample), JSON.stringify(sample)).toBe(normalizeDescription(sample))
     }
+  })
+})
+
+describe('isCoolingDown (délai entre deux recherches)', () => {
+  it('le délai est de 3 secondes', () => {
+    expect(DESCRIBE_COOLDOWN_MS).toBe(3000)
+  })
+  it('aucun délai tant qu\'aucune réponse n\'est arrivée', () => {
+    expect(isCoolingDown(0, 1_000_000)).toBe(false)
+  })
+  it('délai actif juste après une réponse, levé exactement après 3 s', () => {
+    const settledAt = 1_000_000
+    expect(isCoolingDown(settledAt, settledAt)).toBe(true)
+    expect(isCoolingDown(settledAt, settledAt + DESCRIBE_COOLDOWN_MS - 1)).toBe(true)
+    expect(isCoolingDown(settledAt, settledAt + DESCRIBE_COOLDOWN_MS)).toBe(false)
+  })
+  it('une réponse ancienne (cache restitué au retour arrière) ne déclenche aucun délai', () => {
+    expect(isCoolingDown(1_000_000, 1_000_000 + 10 * 60_000)).toBe(false)
+  })
+  it('accepte une durée personnalisée', () => {
+    expect(isCoolingDown(100, 150, 100)).toBe(true)
+    expect(isCoolingDown(100, 200, 100)).toBe(false)
   })
 })
 

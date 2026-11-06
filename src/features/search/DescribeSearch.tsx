@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useEffect, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Loader2, SearchX, Sparkles, WifiOff } from 'lucide-react'
 
@@ -13,7 +13,13 @@ import { useLibrary } from '@/features/library/useLibrary'
 import { ApiError, apiErrorMessage } from '@/lib/api-error'
 import { cn } from '@/lib/utils'
 
-import { DESCRIBE_MAX_CHARS, DESCRIBE_MIN_CHARS, normalizeDescriptionInput } from './describe'
+import {
+  DESCRIBE_COOLDOWN_MS,
+  DESCRIBE_MAX_CHARS,
+  DESCRIBE_MIN_CHARS,
+  isCoolingDown,
+  normalizeDescriptionInput,
+} from './describe'
 import { useDescribe } from './useDescribe'
 
 type Filter = 'all' | 'movie' | 'tv'
@@ -57,15 +63,30 @@ export default function DescribeSearch() {
     )
 
   const query = useDescribe(submitted)
+
+  // Délai de 3 s après chaque réponse (réussie ou non) : protège le quota gratuit contre les envois en rafale.
+  // Une recherche restituée depuis le cache (retour arrière) ne déclenche aucun délai.
+  const settledAt = Math.max(query.dataUpdatedAt, query.errorUpdatedAt)
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    if (settledAt === 0 || query.isFetching) return
+    const end = settledAt + DESCRIBE_COOLDOWN_MS
+    const remaining = end - Date.now()
+    if (remaining <= 0) return
+    const timer = setTimeout(() => setNow(Math.max(Date.now(), end)), remaining)
+    return () => clearTimeout(timer)
+  }, [settledAt, query.isFetching])
+  const coolingDown = !query.isFetching && isCoolingDown(settledAt, now)
+
   const library = useLibrary()
   const owned = new Set((library.data ?? []).map((item) => libraryKey(item.type, item.id)))
 
   const normalizedDraft = normalizeDescriptionInput(draft)
   const tooShort = draft.trim().length > 0 && normalizedDraft === null
-  const canSubmit = normalizedDraft !== null && !query.isFetching
+  const canSubmit = normalizedDraft !== null && !query.isFetching && !coolingDown
 
   const submit = () => {
-    if (normalizedDraft === null || query.isFetching) return
+    if (normalizedDraft === null || query.isFetching || coolingDown) return
     update('d', normalizedDraft)
   }
   const onSubmit = (event: FormEvent) => {
@@ -105,7 +126,11 @@ export default function DescribeSearch() {
         />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground" aria-live="polite">
-            {tooShort ? `Au moins ${DESCRIBE_MIN_CHARS} caractères.` : `${draft.length}/${DESCRIBE_MAX_CHARS}`}
+            {tooShort
+              ? `Au moins ${DESCRIBE_MIN_CHARS} caractères.`
+              : coolingDown
+                ? 'Patiente un instant avant une nouvelle recherche.'
+                : `${draft.length}/${DESCRIBE_MAX_CHARS}`}
           </p>
           <Button type="submit" disabled={!canSubmit}>
             {query.isFetching ? <Loader2 className="animate-spin" /> : <Sparkles />}
@@ -165,7 +190,7 @@ export default function DescribeSearch() {
             <div role="alert" className="flex flex-col items-center gap-3 rounded-2xl border border-destructive/40 px-6 py-12 text-center">
               <p className="text-sm">{apiErrorMessage(query.error)}</p>
               {!quotaReached && (
-                <Button variant="outline" onClick={() => void query.refetch()} disabled={query.isFetching}>
+                <Button variant="outline" onClick={() => void query.refetch()} disabled={query.isFetching || coolingDown}>
                   Réessayer
                 </Button>
               )}

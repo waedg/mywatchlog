@@ -1,6 +1,6 @@
 # MyWatchlog : suivi du projet
 
-Dernière mise à jour : 2026-10-28
+Dernière mise à jour : 2026-11-06
 
 ## Objectif
 
@@ -40,6 +40,7 @@ Cadrage complet : document « MyWatchlog : Cadrage du projet » (artifact Claude
 | 8 | Découverte : recommandations et recherche enrichie (hors fiche) | Terminée (2026-10-30) : 8.1 API, 8.2 page Découvrir, 8.3 « Que regarder ce soir ? », 8.4 « Pour toi », 8.5 Explorer. Voir [docs/phase-8-decouverte.md](docs/phase-8-decouverte.md) |
 | 9 | Collections (listes personnalisées : créer, renommer, supprimer, grouper films et séries) | Terminée (2026-10-30) : 9.1 migration 006, 9.2 couche données, 9.3 onglet Collections, 9.4 détail, 9.5 section de la fiche. Voir [docs/phase-9-listes.md](docs/phase-9-listes.md) |
 | 10 | Suggestions par collection (recommandations calculées à partir des titres d'une collection) | Terminée (2026-10-30) : 10.1 logique pure, 10.2 section Suggestions, « Voir plus » (D-52), 10.3 ajout à la collection / à Ma liste. Voir [docs/phase-10-suggestions.md](docs/phase-10-suggestions.md) |
+| 11 | Recherche par description (retrouver un titre à partir du contexte, via Gemini gratuit puis TMDB) | En test (2026-11-06) : 11.1 action serveur `describe`, 11.2 interface, 11.3 délai de 3 s livrés sur la branche `feat/phase-11-describe` ; test en production par l'utilisateur après fusion, puis 11.4 clôture. Voir [docs/phase-11-recherche-description.md](docs/phase-11-recherche-description.md) |
 
 ## Checklist phase 0
 
@@ -77,3 +78,4 @@ CRON_SECRET=
 | Date | Résumé |
 |---|---|
 | 2026-10-28 | Cadrage, choix du stack, 14 décisions validées, fichiers de suivi, squelette Vite poussé, premier déploiement Vercel en ligne |
+| 2026-11-06 | Phase 11 : cadrage (D-53), essai Gemini (premier projet en facturation prépayée, 402 ; nouveau projet sans facturation, 200), blocs 11.1 à 11.3 livrés sur `feat/phase-11-describe` |
