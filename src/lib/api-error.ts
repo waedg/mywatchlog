@@ -41,6 +41,9 @@ export function apiErrorMessage(error: unknown): string {
   if (error instanceof ListError) return LIST_ERROR_MESSAGES[error.code]
   if (error instanceof OfflineError) return 'Hors connexion : cette modification nécessite internet. Réessaie une fois reconnecté.'
   if (error instanceof ApiError) {
+    // Codes de la recherche par description : testés avant le statut (le quota IA arrive en 429).
+    if (error.code === 'ai_quota') return 'Quota IA atteint, réessaie plus tard.'
+    if (error.code === 'ai_unavailable') return 'La recherche par description est momentanément indisponible. Réessaie dans un instant.'
     if (error.status === 401) return 'Ta session a expiré. Reconnecte-toi puis réessaie.'
     if (error.status === 403) return "Ce compte n'est pas autorisé à utiliser l'application."
     if (error.status === 429) return 'Trop de requêtes. Réessaie dans un instant.'

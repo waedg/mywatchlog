@@ -1,4 +1,5 @@
 import type {
+  DescribeResponse,
   DiscoverFilters,
   ForYouResponse,
   GenresResponse,
@@ -33,6 +34,11 @@ async function tmdbRequest<T>(params: Record<string, string>, signal?: AbortSign
 
 export function searchTitles(query: string, signal?: AbortSignal): Promise<SearchResponse> {
   return tmdbRequest<SearchResponse>({ action: 'search', q: query }, signal)
+}
+
+/** Recherche par description (phase 11) : le serveur interroge Gemini puis TMDB ; 5 résultats au maximum. */
+export function describeTitles(description: string, signal?: AbortSignal): Promise<DescribeResponse> {
+  return tmdbRequest<DescribeResponse>({ action: 'describe', q: description }, signal)
 }
 
 export function getTitleDetails(type: MediaType, id: number, signal?: AbortSignal): Promise<TitleDetails> {

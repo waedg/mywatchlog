@@ -9,6 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import AddToLibraryButton from '@/features/library/AddToLibraryButton'
 import { libraryKey, parseTypeFilter } from '@/features/library/group'
 import { useLibrary } from '@/features/library/useLibrary'
+import DescribeSearch from '@/features/search/DescribeSearch'
+import { parseSearchMode, type SearchMode } from '@/features/search/describe'
 import { MIN_QUERY_LENGTH, useSearch } from '@/features/search/useSearch'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { apiErrorMessage } from '@/lib/api-error'
@@ -24,7 +26,51 @@ const FILTERS: { value: Filter; label: string }[] = [
 
 const GRID = 'grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
 
+const MODES: { value: SearchMode; label: string }[] = [
+  { value: 'title', label: 'Titre' },
+  { value: 'description', label: 'Description' },
+]
+
+/** Page Recherche : sélecteur de mode (phase 11) puis recherche par titre (inchangée) ou par description. */
 export default function SearchPage() {
+  const [params, setParams] = useSearchParams()
+  const mode = parseSearchMode(params.get('mode'))
+  const setMode = (value: SearchMode) =>
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current)
+        if (value === 'description') next.set('mode', 'description')
+        else next.delete('mode')
+        return next
+      },
+      { replace: true },
+    )
+
+  return (
+    <section className="space-y-6">
+      <h1 className="text-2xl font-bold tracking-tight">Recherche</h1>
+
+      <div className="flex gap-2" role="group" aria-label="Mode de recherche">
+        {MODES.map(({ value, label }) => (
+          <Button
+            key={value}
+            size="sm"
+            variant={mode === value ? 'default' : 'outline'}
+            className={cn('rounded-full', mode !== value && 'text-muted-foreground')}
+            aria-pressed={mode === value}
+            onClick={() => setMode(value)}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+
+      {mode === 'description' ? <DescribeSearch /> : <TitleSearch />}
+    </section>
+  )
+}
+
+function TitleSearch() {
   // Requête et filtre dans l'URL : le bouton retour restitue la même recherche (D-34).
   const [params, setParams] = useSearchParams()
   const input = params.get('q') ?? ''
@@ -56,9 +102,7 @@ export default function SearchPage() {
   const visible = filter === 'all' ? results : results.filter((r) => r.type === filter)
 
   return (
-    <section className="space-y-6">
-      <h1 className="text-2xl font-bold tracking-tight">Recherche</h1>
-
+    <div className="space-y-6">
       <div className="relative">
         <SearchIcon className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -171,6 +215,6 @@ export default function SearchPage() {
           )}
         </>
       )}
-    </section>
+    </div>
   )
 }

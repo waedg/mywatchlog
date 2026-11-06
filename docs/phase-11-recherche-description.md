@@ -1,6 +1,6 @@
 # Phase 11 — Recherche par description (cadrage)
 
-Statut : **en cours** (2026-11-06). Cadrage validé (D-53), modèle `gemini-3.1-flash-lite`. Bloc 11.1 (action serveur `describe`) réalisé, en attente de ta validation ; 11.2 à 11.4 non commencés. Réalisation : section 8.
+Statut : **en cours** (2026-11-06). Cadrage validé (D-53), modèle `gemini-3.1-flash-lite`. Bloc 11.1 (action serveur `describe`) livré ; bloc 11.2 (interface) livré, à tester après fusion dans `main` ; 11.3 (états et délai) et 11.4 (clôture) à faire. Réalisation : section 8.
 
 ## 1. Objectif
 
@@ -151,3 +151,21 @@ Points techniques :
 ### Constat sur la facturation Gemini
 
 Le premier projet AI Studio de l'utilisateur était en facturation prépayée : l'appel renvoyait 402 (« crédits épuisés »), donc pas de niveau gratuit. Une clé créée dans un **nouveau projet sans moyen de paiement** a donné un 200. À conserver : un projet auquel on relie une facturation peut sortir du niveau gratuit ; ne jamais utiliser pour cette fonction une clé d'un projet facturé.
+
+### Bloc 11.2 — interface (2026-11-06)
+
+Sur la page Recherche, un sélecteur **Titre / Description** (paramètre d'URL `mode=description`, le mode Titre reste le défaut et n'est pas modifié).
+
+| Choix | Détail |
+|---|---|
+| Déclenchement | Bouton « Rechercher » ou Entrée (Maj+Entrée : retour à la ligne). **Pas de recherche à la frappe** : environ 2,5 s et du quota à chaque appel |
+| URL (D-34) | `d` = description soumise (nettoyée), `type` = filtre. Le retour arrière restitue la recherche sans rappeler l'IA tant que le résultat est en cache |
+| Cache | 30 minutes en mémoire (`staleTime`), `retry: false` (le réessai automatique de l'application doublerait la consommation du quota). Clé `describe` non persistée sur l'appareil |
+| Saisie | 3 à 500 caractères (constantes client identiques à celles du serveur, vérifiées par un test) |
+| États | Invite initiale, hors connexion, chargement (5 squelettes), erreur avec « Réessayer » (masqué si quota atteint), aucun résultat avec conseils |
+| Messages | `ai_quota` : « Quota IA atteint, réessaie plus tard. » ; `ai_unavailable` : message dédié ; testés avant le statut HTTP |
+| Mention | « Suggestions générées par une IA : elles peuvent se tromper. » |
+
+Fichiers : `src/components/ui/textarea.tsx`, `src/features/search/{describe.ts, useDescribe.ts, DescribeSearch.tsx}`, `src/lib/{api.ts, api-error.ts}`, `src/pages/SearchPage.tsx` (l'ancien corps devient `TitleSearch`, comportement identique), `tests/describe-client.test.ts`.
+
+Limites connues du bloc : la grille et les filtres de `DescribeSearch` dupliquent ceux de la recherche par titre (environ 40 lignes, choix assumé pour ne pas toucher au mode Titre) ; l'interface n'a pas été vue en navigateur par l'auteur du code, seulement compilée et testée sur sa logique ; le délai de 3 s entre deux soumissions est reporté au bloc 11.3.
