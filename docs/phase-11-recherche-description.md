@@ -1,0 +1,153 @@
+# Phase 11 — Recherche par description (cadrage)
+
+Statut : **en cours** (2026-11-06). Cadrage validé (D-53), modèle `gemini-3.1-flash-lite`. Bloc 11.1 (action serveur `describe`) réalisé, en attente de ta validation ; 11.2 à 11.4 non commencés. Réalisation : section 8.
+
+## 1. Objectif
+
+Sur la page Recherche existante, permettre de retrouver un film ou une série à partir d'une description du contexte (« un homme retrouve sa mémoire grâce à des tatouages »), quand le titre est oublié.
+
+Hors périmètre : modification de la fiche, recherche par description dans « Ma liste » (découverte uniquement), plusieurs résultats au-delà de 5, nouvelle migration SQL.
+
+## 2. Décisions de cadrage (2026-11-06)
+
+| N° | Question | Réponse |
+|---|---|---|
+| 1 | Fournisseur principal | Gemini (offre gratuite). **Modèle validé le 2026-11-06 : Gemini 3.1 Flash-Lite** (temps de réponse mesuré par l'utilisateur : 2,5 s) |
+| 2 | Confidentialité (données de l'offre gratuite pouvant servir à améliorer les produits Google) | Acceptée |
+| 3 | Repli payant en cas de quota épuisé | Non : message d'erreur seul |
+| 4 | Essai 11.0 | Réalisé par l'utilisateur dans Google AI Studio, guidé |
+| 5 | Emplacement | Page Recherche existante, bascule « Titre / Description » |
+| 6 | Langue des descriptions | Français ou anglais |
+| 7 | Nombre de résultats | 5 maximum |
+| 8 | Périmètre | Découverte uniquement (pas de recherche dans Ma liste) |
+| 9 | Fiche | Aucune modification (hypothèse par défaut, à confirmer) |
+
+Conséquences :
+
+- D-01 (coût 0 €) reste respecté tant que le quota gratuit suffit ; aucun amendement.
+- La page Recherche, déclarée « inchangée » en phase 8, est modifiée volontairement par cette phase : la nouvelle décision remplace cette règle pour la page Recherche uniquement.
+
+## 3. Architecture
+
+```text
+Client                     Vercel (api/tmdb.ts)                 Gemini API        TMDB
+  | describe(texte) ----->  JWT + is_allowed()
+  |                         validation d'entrée (<= 500 car.)
+  |                         ------------------------------->  candidats JSON
+  |                         pour chaque candidat ---------------------------------> /search/{type}
+  |                         dédoublonnage, include_adult=false
+  | <---- 5 résultats TMDB max (ids issus de TMDB)
+```
+
+Règles :
+
+1. Le modèle ne renvoie **jamais** d'identifiant TMDB : uniquement `title`, `year`, `type`. Les `id` viennent exclusivement de TMDB.
+2. Un candidat sans correspondance TMDB (titre + année) est écarté.
+3. Sortie du modèle en JSON structuré, validée côté serveur.
+4. Clé `GEMINI_API_KEY` uniquement dans les variables Vercel (serveur), jamais dans le dépôt ni dans le navigateur.
+5. Proxy protégé par JWT et `is_allowed()`, comme les autres actions.
+6. Clés composites `(id, type)` conservées (D-10) ; `Cache-Control: no-store` côté serveur (D-42).
+7. Quota épuisé (Gemini 429) ou crédits épuisés (Gemini 402) : réponse `429 ai_quota`, message « Quota IA atteint, réessaie plus tard ». Aucun repli vers un autre fournisseur.
+8. Hors connexion : fonction désactivée avec le message dédié (D-44).
+9. Limitation de débit : pas de table (aucune migration). Délai minimum côté client entre deux requêtes et entrée plafonnée à 500 caractères ; le quota Gemini fait office de plafond global.
+
+Interface fournisseur envisagée (spécification, non implémentée) :
+
+```ts
+interface Candidate { title: string; year?: number; type: 'movie' | 'tv' }
+interface DescribeProvider {
+  suggest(description: string, signal: AbortSignal): Promise<Candidate[]>
+}
+```
+
+## 4. Essai 11.0 (avant tout développement)
+
+Réalisé par l'utilisateur dans Google AI Studio (gratuit). Durée estimée : 30 à 45 minutes.
+
+1. Créer une clé et relever, pour le modèle testé, le quota affiché (requêtes par minute / par jour).
+2. Préparer 15 descriptions réelles (mélange de films et séries, français et anglais, courtes et longues).
+3. Pour chacune, soumettre la consigne ci-dessous, d'abord **sans** recherche Google, puis **avec** « Grounding with Google Search » si l'option est proposée.
+4. Remplir la grille de notation.
+
+Consigne :
+
+```text
+Tu aides à retrouver un film ou une série dont l'utilisateur a oublié le titre.
+À partir de la description ci-dessous, renvoie au maximum 5 candidats classés du plus probable au moins probable.
+Réponds uniquement en JSON, sans texte autour : [{"title": "...", "year": 2000, "type": "movie"}]
+"type" vaut "movie" ou "tv". Utilise le titre original. N'invente aucun titre : si tu n'es pas sûr, renvoie moins de candidats.
+
+Description : <description>
+```
+
+Grille (une ligne par description) :
+
+| # | Description | Modèle | Grounding (oui/non) | Rang du bon titre (1-5, ou 0 = absent) | Titre inventé (oui/non) | Temps de réponse (s) |
+|---|---|---|---|---|---|---|
+
+Critères de décision :
+
+| Résultat | Décision |
+|---|---|
+| Bon titre dans les 5 pour au moins 80 % des descriptions, quota suffisant | Gemini gratuit, bloc 11.1 |
+| Qualité correcte seulement avec grounding, et grounding gratuit disponible | Gemini avec grounding |
+| Qualité insuffisante ou quota trop bas | Réouvrir le choix du fournisseur (nouvelle décision) |
+
+## 5. Découpage prévisible (après 11.0)
+
+| Bloc | Contenu | Testable par l'utilisateur |
+|---|---|---|
+| 11.1 | Action serveur `describe` : validation d'entrée, appel Gemini, résolution TMDB, gestion du 429, tests Vitest (fournisseur simulé) | Non (tests) |
+| 11.2 | Page Recherche : bascule « Titre / Description », champ, résultats avec ajout rapide et pastille de statut | Oui |
+| 11.3 | États : chargement, vide, erreur, quota, hors-ligne ; délai minimal entre requêtes | Oui |
+| 11.4 | Tests, `tsc`, `oxlint`, build, clôture des fichiers de suivi | Phase terminée |
+
+Un bloc à la fois, validation de l'utilisateur entre chaque bloc.
+
+## 6. Risques
+
+| Risque | Réponse |
+|---|---|
+| Titre inventé par le modèle | Résolution TMDB obligatoire, candidat écarté sinon |
+| Film récent inconnu du modèle | Résultat vide ou partiel, message clair ; recherche par titre toujours disponible |
+| Quota gratuit modifié ou supprimé par Google | Détecté par l'erreur 429 ; réouverture de la décision 1 |
+| Clé exposée | Variable Vercel serveur uniquement, jamais dans le dépôt public |
+| Abus de la clé par un tiers | JWT + `is_allowed()` sur l'action |
+| Données envoyées à Google | Acceptées (décision 2) ; ne jamais y joindre d'information personnelle autre que la description |
+
+## 7. Points à confirmer
+
+1. Hypothèse 9 : aucune modification de la fiche.
+2. Limitation de débit sans table (délai client + quota Gemini) acceptable pour un usage à un seul utilisateur.
+3. ~~Identifiant exact du modèle~~ : relevé le 2026-11-06, `GEMINI_MODEL=gemini-3.1-flash-lite` (version stable ; ni l'alias `gemini-flash-lite-latest`, ni la variante `-preview`).
+4. Restent à relever avant la mise en production : quota du modèle (requêtes par minute / par jour) dans AI Studio, et taux de bons titres sur des descriptions réelles (un essai de 5 à 15 descriptions). Le grounding (recherche Google) n'est pas gratuit : exclu.
+5. ~~Numéro de décision~~ : D-53.
+
+## 8. Réalisation
+
+### Bloc 11.1 — action serveur `describe` (2026-11-06)
+
+Contrat final : `GET /api/tmdb?action=describe&q=<description>` (jeton Supabase obligatoire).
+
+| Code | Corps | Cas |
+|---|---|---|
+| 200 | `{ "results": SearchResult[] }` | 0 à 5 résultats, ids issus de TMDB |
+| 400 | `bad_request` | `q` absent ou hors de 3 à 500 caractères (aucun appel externe) |
+| 401 / 403 | `unauthorized` / `forbidden` | inchangé (JWT + `is_allowed()`) |
+| 429 | `ai_quota` | Gemini 429 (quota) ou 402 (crédits épuisés) |
+| 429 | `rate_limited` | TMDB 429 sur tous les candidats (inchangé) |
+| 500 | `server_misconfigured` | `GEMINI_API_KEY` ou `GEMINI_MODEL` absent |
+| 502 | `ai_unavailable` | erreur Gemini, délai de 8 s dépassé, panne réseau |
+| 502 | `tmdb_error` | toutes les recherches TMDB ont échoué |
+
+Points techniques :
+
+- API Gemini : Interactions (`POST /v1beta/interactions`), clé dans l'en-tête `x-goog-api-key` (jamais dans l'URL), `generation_config.thinking_level = "minimal"`, sortie JSON contrainte (`response_format`). Le texte est lu dans `steps[]` (type `model_output`) puis `content[].text` ; forme relevée par un appel réel le 2026-11-06 et fixée par un test.
+- **Écart avec le plan initial** : la logique pure reste dans `api/tmdb.ts` (fonctions exportées), pas dans `shared/`, car D-30 limite `shared/` aux types importés avec `import type`. Aucun fichier ajouté dans `api/` (chaque fichier y est une fonction Vercel).
+- Rapprochement avec TMDB : `/search/{movie|tv}` en `fr-FR`, `include_adult=false` ; avec année, écart de ±1 an toléré ; sans année, titre identique exigé. Un candidat sans correspondance est écarté.
+- Variables Vercel à saisir (serveur uniquement) : `GEMINI_API_KEY` et `GEMINI_MODEL=gemini-3.1-flash-lite`.
+- Tests : `tests/describe.test.ts` (logique pure, forme de la réponse Gemini) et `tests/describe-handler.test.ts` (handler, Gemini et TMDB simulés).
+
+### Constat sur la facturation Gemini
+
+Le premier projet AI Studio de l'utilisateur était en facturation prépayée : l'appel renvoyait 402 (« crédits épuisés »), donc pas de niveau gratuit. Une clé créée dans un **nouveau projet sans moyen de paiement** a donné un 200. À conserver : un projet auquel on relie une facturation peut sortir du niveau gratuit ; ne jamais utiliser pour cette fonction une clé d'un projet facturé.

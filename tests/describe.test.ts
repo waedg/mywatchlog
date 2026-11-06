@@ -3,11 +3,12 @@ import {
   DESCRIBE_MAX_CHARS,
   DESCRIBE_MAX_RESULTS,
   buildPrompt,
+  extractModelText,
   mergeResolved,
   normalizeDescription,
   parseCandidates,
   pickMatch,
-} from '../shared/describe'
+} from '../api/tmdb'
 import type { SearchResult } from '../shared/tmdb-types'
 
 const result = (id: number, type: 'movie' | 'tv', title: string, year: number | null): SearchResult => ({
@@ -130,6 +131,32 @@ describe('pickMatch', () => {
   })
   it('renvoie null sans résultat', () => {
     expect(pickMatch({ title: 'Inventé', year: 2001, type: 'movie' }, [])).toBeNull()
+  })
+})
+
+describe('extractModelText', () => {
+  // Forme réelle relevée le 2026-11-06 sur gemini-3.1-flash-lite (API Interactions).
+  const envelope = {
+    status: 'completed',
+    steps: [
+      { type: 'thought', signature: 'abc' },
+      { type: 'model_output', content: [{ type: 'text', text: '{"candidates":[{"title":"Memento","type":"movie","year":2000}]}' }] },
+    ],
+    model: 'gemini-3.1-flash-lite',
+  }
+
+  it('lit le texte de l\'étape model_output et ignore le raisonnement', () => {
+    const text = extractModelText(envelope)
+    expect(parseCandidates(text)).toEqual([{ title: 'Memento', year: 2000, type: 'movie' }])
+  })
+  it('assemble plusieurs blocs de texte', () => {
+    const data = { steps: [{ type: 'model_output', content: [{ type: 'text', text: '[{"title":' }, { type: 'text', text: '"A","type":"tv"}]' }] }] }
+    expect(extractModelText(data)).toBe('[{"title":"A","type":"tv"}]')
+  })
+  it('renvoie une chaîne vide si la forme est inattendue', () => {
+    for (const data of [null, undefined, 42, {}, { steps: 'x' }, { steps: [null, 1, { type: 'thought' }] }, { steps: [{ type: 'model_output' }] }, { steps: [{ type: 'model_output', content: [{ type: 'image' }] }] }]) {
+      expect(extractModelText(data)).toBe('')
+    }
   })
 })
 
