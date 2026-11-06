@@ -646,10 +646,24 @@ const GEMINI_TIMEOUT_MS = 8000
 
 class GeminiError extends Error {
   status: number
-  constructor(status: number) {
+  /** Message d'erreur renvoyé par Google (diagnostic), tronqué ; jamais la requête envoyée. */
+  detail: string
+  constructor(status: number, detail = '') {
     super(`Gemini ${status}`)
     this.status = status
+    this.detail = detail
   }
+}
+
+/** Extrait le message d'erreur d'une réponse d'échec de Gemini ({ error: { message } }), tronqué à 200 caractères. */
+export function extractGeminiErrorDetail(body: string): string {
+  try {
+    const message = (JSON.parse(body) as { error?: { message?: unknown } } | null)?.error?.message
+    if (typeof message === 'string') return message.replace(/\s+/g, ' ').trim().slice(0, 200)
+  } catch {
+    // corps non JSON : aucun détail exploitable
+  }
+  return ''
 }
 
 /**
@@ -677,7 +691,7 @@ async function callGemini(description: string, apiKey: string, model: string): P
       response_format: { type: 'text', mime_type: 'application/json', schema: DESCRIBE_SCHEMA },
     }),
   })
-  if (!response.ok) throw new GeminiError(response.status)
+  if (!response.ok) throw new GeminiError(response.status, extractGeminiErrorDetail(await response.text().catch(() => '')))
   return extractModelText(await response.json())
 }
 
@@ -922,7 +936,8 @@ export default {
           text = await callGemini(description, apiKey, model)
         } catch (error) {
           const reason = describeGeminiFailure(error)
-          console.error(`[describe] échec Gemini : ${reason} après ${Date.now() - startedAt} ms`)
+          const detail = error instanceof GeminiError && error.detail ? ` — ${error.detail}` : ''
+          console.error(`[describe] échec Gemini : ${reason} après ${Date.now() - startedAt} ms${detail}`)
           // 429 : quota gratuit atteint ; 402 : crédits épuisés. Aucun repli vers un autre fournisseur.
           if (error instanceof GeminiError && (error.status === 429 || error.status === 402)) {
             return json({ error: 'ai_quota', reason }, 429)

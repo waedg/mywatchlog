@@ -155,6 +155,22 @@ describe('api/tmdb : action describe (phase 11.1)', () => {
     }
   })
 
+  it('journalise le message d\'erreur de Google (tronqué), jamais la clé ni la description', async () => {
+    const message = `API key not valid. ${'x'.repeat(400)}`
+    setup({ gemini: () => Response.json({ error: { code: 400, message } }, { status: 400 }) })
+    const logs = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const response = await describeCall('une description secrète')
+    expect(response.status).toBe(502)
+    expect(await response.json()).toEqual({ error: 'ai_unavailable', reason: 'http_400' })
+    const logged = logs.mock.calls.flat().join(' ')
+    expect(logged).toContain('http_400')
+    expect(logged).toContain('API key not valid.')
+    expect(logged.length).toBeLessThan(300)
+    expect(logged).not.toContain(GEMINI_KEY)
+    expect(logged).not.toContain('secrète')
+    logs.mockRestore()
+  })
+
   it('liste vide si le modèle renvoie un texte inexploitable, sans appel TMDB', async () => {
     const fetchMock = setup({ gemini: () => Response.json(geminiEnvelope('désolé, aucune idée')) })
     const response = await describeCall('une description')
